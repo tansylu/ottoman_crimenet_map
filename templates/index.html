@@ -1,23 +1,167 @@
-<!-- filepath: /Users/tansylu/Documents/ottoman_crimenet_map/templates/index.html -->
+_crimenet_map/templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map with Markers</title>
+    <title>Ottoman Crime Network Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
         #map {
-            height: 100vh;
+            height: calc(100vh - 100px);
+            width: 100%;
+        }
+        #time-slider-container {
+            height: 80px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        #time-slider {
+            margin: 10px 20px;
+            height: 20px;
+        }
+        #current-year {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .marker-popup {
+            max-width: 300px;
+        }
+        .marker-details {
+            padding: 10px;
+        }
+        .marker-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .marker-description {
+            margin-bottom: 5px;
+        }
+        .marker-link {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #f8f8f8;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .legend {
+            position: absolute;
+            bottom: 110px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            z-index: 500;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .reset-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 500;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .reset-button:hover {
+            background: #f0f0f0;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="time-slider-container">
+        <div id="current-year">1854</div>
+        <div id="time-slider"></div>
+    </div>
+    
+    <button id="reset-view" class="reset-button">Reset View</button>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: red;"></div>
+            <span>Forgery</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: blue;"></div>
+            <span>Escape</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: black;"></div>
+            <span>Arrest</span>
+        </div>
+    </div>
+    
+    <!-- Modal for detailed criminal information -->
+    <div id="criminal-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-name"></h2>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script>
+        // Store all markers and data - Define these variables first
+        let allMarkers = [];
+        let visibleMarkers = [];
+        let markerData = {};
+        
         // Firebase configuration
         const firebaseConfig = {{ firebase_config | tojson }};
         
@@ -25,8 +169,9 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Initialize the map
-        const map = L.map('map').setView([41.8719, 12.5674], 6);
+        // Initialize the map - centered on Ottoman Empire's approximate center
+        const map = L.map('map').setView([39.5, 35], 5);
+        const initialView = {center: [39.5, 35], zoom: 5};
 
         // Add a base layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -34,18 +179,366 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Fetch markers from Firestore and add to map
-        db.collection('markers').get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const marker = doc.data();
-                console.log(marker); // Log the marker object
-                const coordinates = marker.coordinate;
-                const title = marker.title;
-                L.marker([coordinates._lat, coordinates._long]).addTo(map)
-                    .bindPopup(title)
-                    .openPopup();
+        // Initialize time variables
+        const START_YEAR = 1854;
+        const END_YEAR = 1900; // You can adjust this to your data's end date
+        let currentYear = START_YEAR;
+        
+        // Update markers based on current year
+        function updateMarkers() {
+            // Remove all currently visible markers
+            visibleMarkers.forEach(marker => map.removeLayer(marker));
+            visibleMarkers = [];
+            
+            // Add markers for the current year
+            allMarkers.forEach(marker => {
+                const data = marker.documentData;
+                if (data.date && data.date.year === currentYear) {
+                    map.addLayer(marker);
+                    visibleMarkers.push(marker);
+                }
             });
+        }
+        
+        // Initialize slider
+        const slider = document.getElementById('time-slider');
+        noUiSlider.create(slider, {
+            start: START_YEAR,
+            connect: 'lower',
+            step: 1,
+            range: {
+                'min': START_YEAR,
+                'max': END_YEAR
+            },
+            format: {
+                to: value => Math.round(value),
+                from: value => Math.round(value)
+            }
         });
+
+        // Update year display when slider changes - we'll connect this after fetching data
+        slider.noUiSlider.on('update', function(values, handle) {
+            currentYear = parseInt(values[handle]);
+            document.getElementById('current-year').innerText = currentYear;
+            
+            // Only call updateMarkers if markers have been loaded
+            if (allMarkers.length > 0) {
+                updateMarkers();
+            }
+        });
+        
+        // Function to create a marker with appropriate popup
+        function createMarker(docSnapshot, showPopup = false) {
+        const data = docSnapshot.data();
+        const id = docSnapshot.id;
+            
+            // Handle coordinates whether they're stored as Geopoint or lat/lng object
+            let lat, lng;
+            if (data.coordinates && data.coordinates.latitude !== undefined) {
+                // Handling Geopoint format
+                lat = data.coordinates.latitude;
+                lng = data.coordinates.longitude;
+            } else if (data.coordinates) {
+                // Handling object format {lat, lng}
+                lat = data.coordinates.lat;
+                lng = data.coordinates.lng;
+            } else {
+                console.error("Invalid coordinates for marker:", id);
+                return null; // Skip this marker
+            }
+            
+            const markerType = data.type; // 'forgery', 'escape', or 'arrest'
+            
+            // Different icons for different types of events
+            let markerIcon;
+            if (markerType === 'forgery') {
+                markerIcon = L.divIcon({
+                    html: '<div style="background-color: red; width: 10px; height: 10px; border-radius: 50%;"></div>',
+                    className: 'marker-icon'
+                });
+            } else if (markerType === 'escape') {
+                markerIcon = L.divIcon({
+                    html: '<div style="background-color: blue; width: 10px; height: 10px; border-radius: 50%;"></div>',
+                    className: 'marker-icon'
+                });
+            } else if (markerType === 'arrest') {
+                markerIcon = L.divIcon({
+                    html: '<div style="background-color: black; width: 10px; height: 10px; border-radius: 50%;"></div>',
+                    className: 'marker-icon'
+                });
+            } else {
+                // Default marker for any other types
+                markerIcon = L.divIcon({
+                    html: '<div style="background-color: gray; width: 10px; height: 10px; border-radius: 50%;"></div>',
+                    className: 'marker-icon'
+                });
+            }
+            
+            const marker = L.marker([lat, lng], {icon: markerIcon});
+            
+            // Create popup content
+            const popupContent = document.createElement('div');
+            popupContent.className = 'marker-popup';
+            
+            const title = document.createElement('div');
+            title.className = 'marker-title';
+            title.innerText = data.location || 'Untitled Location';
+            popupContent.appendChild(title);
+            
+            if (data.description && data.description.trim() !== '') {
+                const description = document.createElement('div');
+                description.className = 'marker-description';
+                description.innerText = data.description;
+                popupContent.appendChild(description);
+            }
+            
+            const typeText = document.createElement('div');
+            typeText.innerText = `Type: ${markerType.charAt(0).toUpperCase() + markerType.slice(1)}`;
+            popupContent.appendChild(typeText);
+            
+            const dateText = document.createElement('div');
+            let dateString = "Date: ";
+            if (data.date) {
+                // Format the month name based on numeric value
+                const monthNames = ["January", "February", "March", "April", "May", "June", 
+                                    "July", "August", "September", "October", "November", "December"];
+                
+                if (data.date.month && data.date.day) {
+                    // Full date with month name, day and year
+                    const monthName = monthNames[data.date.month - 1] || `Month ${data.date.month}`;
+                    dateString += `${monthName} ${data.date.day}, ${data.date.year}`;
+                } else if (data.date.month) {
+                    // Month and year only
+                    const monthName = monthNames[data.date.month - 1] || `Month ${data.date.month}`;
+                    dateString += `${monthName} ${data.date.year}`;
+                } else {
+                    // Year only
+                    dateString += `${data.date.year}`;
+                }
+            }
+            dateText.innerText = dateString;
+            popupContent.appendChild(dateText); 
+            
+            // Add criminal link if this marker is associated with a criminal
+            if (data.criminalId) {
+                const criminalLink = document.createElement('div');
+                criminalLink.className = 'marker-link';
+                criminalLink.innerText = 'Show criminal details';
+                criminalLink.addEventListener('click', () => showCriminalDetails(data.criminalId));
+                popupContent.appendChild(criminalLink);
+                
+                // Add related locations link
+                const relatedLink = document.createElement('div');
+                relatedLink.className = 'marker-link';
+                relatedLink.innerText = 'Show all related locations';
+                relatedLink.addEventListener('click', () => showRelatedLocations(data.criminalId));
+                popupContent.appendChild(relatedLink);
+            }
+            
+            marker.bindPopup(popupContent);
+            
+            // Add double-click handler to show criminal details
+            marker.on('dblclick', function() {
+                if (data.criminalId) {
+                    showCriminalDetails(data.criminalId);
+                }
+            });
+            
+            // Store the data with the marker for reference
+            marker.documentData = data;
+            marker.documentId = id;
+            
+            return marker;
+        }
+
+        // Fetch all marker data from Firestore
+        function fetchMarkers() {
+            console.log("Fetching markers from Firestore...");
+            db.collection('events').get().then((querySnapshot) => {
+                console.log(`Found ${querySnapshot.size} events in Firestore`);
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const marker = createMarker(doc);
+                    
+                    // Only add valid markers (with coordinates)
+                    if (marker) {
+                        allMarkers.push(marker);
+                        markerData[doc.id] = data;
+                    }
+                });
+                
+                console.log(`Added ${allMarkers.length} valid markers to the map`);
+                
+                // Initial update after all markers are loaded
+                updateMarkers();
+            }).catch(error => {
+                console.error("Error fetching markers:", error);
+                alert("Error loading map data. Please try again later.");
+            });
+        }
+        // Show criminal details in modal
+        function showCriminalDetails(criminalId) {
+            db.collection('criminals').doc(criminalId).get().then((doc) => {
+                if (doc.exists) {
+                    const criminalData = doc.data();
+                    
+                    // Populate modal with criminal data
+                    document.getElementById('modal-name').innerText = criminalData.name || 'Unknown';
+                    
+                    const detailsDiv = document.getElementById('modal-details');
+                    detailsDiv.innerHTML = '';
+                    
+                    // Add all criminal details
+                    if (criminalData.birthdate) {
+                        const birthDate = document.createElement('p');
+                        birthDate.innerHTML = `<strong>Birth Year:</strong> ${criminalData.birthdate}`;
+                        detailsDiv.appendChild(birthDate);
+                    }
+                    
+                    if (criminalData.birthplace) {
+                        const birthPlace = document.createElement('p');
+                        birthPlace.innerHTML = `<strong>Birth Place:</strong> ${criminalData.birthplace}`;
+                        detailsDiv.appendChild(birthPlace);
+                    }
+                    
+                    if (criminalData.prof && criminalData.prof.trim() !== '') {
+                        const occupation = document.createElement('p');
+                        occupation.innerHTML = `<strong>Occupation:</strong> ${criminalData.prof}`;
+                        detailsDiv.appendChild(occupation);
+                    }
+                    
+                    if (criminalData.placeofprof && criminalData.placeofprof.trim() !== '') {
+                        const placeOfProf = document.createElement('p');
+                        placeOfProf.innerHTML = `<strong>Place of Profession:</strong> ${criminalData.placeofprof}`;
+                        detailsDiv.appendChild(placeOfProf);
+                    }
+                    
+                    if (criminalData.nation && criminalData.nation.trim() !== '') {
+                        const nation = document.createElement('p');
+                        nation.innerHTML = `<strong>Nationality:</strong> ${criminalData.nation}`;
+                        detailsDiv.appendChild(nation);
+                    }
+                    
+                    if (criminalData.alias && criminalData.alias.trim() !== '') {
+                        const alias = document.createElement('p');
+                        alias.innerHTML = `<strong>Alias:</strong> ${criminalData.alias}`;
+                        detailsDiv.appendChild(alias);
+                    }
+                    
+                    // Add additional information about events
+                    const eventsHeader = document.createElement('h3');
+                    eventsHeader.innerText = 'Timeline';
+                    detailsDiv.appendChild(eventsHeader);
+                    
+                    const eventsList = document.createElement('ul');
+                    detailsDiv.appendChild(eventsList);
+                    
+                    // Find and sort all events related to this criminal
+                    const relatedEvents = allMarkers
+                        .filter(marker => marker.documentData.criminalId === criminalId)
+                        .map(marker => marker.documentData)
+                        .sort((a, b) => {
+                            if (a.date.year !== b.date.year) return a.date.year - b.date.year;
+                            if (a.date.month && b.date.month && a.date.month !== b.date.month) return a.date.month - b.date.month;
+                            if (a.date.day && b.date.day) return a.date.day - b.date.day;
+                            return 0;
+                        });
+                    
+                    if (relatedEvents.length === 0) {
+                        const noEvents = document.createElement('p');
+                        noEvents.innerText = 'No events found for this criminal.';
+                        eventsList.appendChild(noEvents);
+                    } else {
+                        relatedEvents.forEach(event => {
+                            const eventItem = document.createElement('li');
+                            
+                            // Format the date with month name
+                            let dateStr = "";
+                            if (event.date) {
+                                const monthNames = ["January", "February", "March", "April", "May", "June", 
+                                                "July", "August", "September", "October", "November", "December"];
+                                
+                                if (event.date.month && event.date.day) {
+                                    // Full date
+                                    const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
+                                    dateStr = `${monthName} ${event.date.day}, ${event.date.year}`;
+                                } else if (event.date.month) {
+                                    // Month and year
+                                    const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
+                                    dateStr = `${monthName} ${event.date.year}`;
+                                } else {
+                                    // Year only
+                                    dateStr = `${event.date.year}`;
+                                }
+                            }
+                            
+                            eventItem.innerHTML = `<strong>${dateStr}:</strong> ${event.type.charAt(0).toUpperCase() + event.type.slice(1)} at ${event.location}${event.description && event.description.trim() !== '' ? ' - ' + event.description : ''}`;
+                            eventsList.appendChild(eventItem);
+                        });
+                    }
+                    
+                    // Show the modal
+                    document.getElementById('criminal-modal').style.display = 'block';
+                } else {
+                    console.log("No criminal found with ID:", criminalId);
+                    alert(`No criminal found with ID: ${criminalId}`);
+                }
+            }).catch(error => {
+                console.error("Error getting criminal:", error);
+                alert("Error retrieving criminal details. Please try again.");
+            });
+        }
+
+        // Show all related locations for a criminal
+        function showRelatedLocations(criminalId) {
+            // Remove all currently visible markers
+            visibleMarkers.forEach(marker => map.removeLayer(marker));
+            visibleMarkers = [];
+            
+            // Find all markers related to this criminal
+            const relatedMarkers = allMarkers.filter(marker => 
+                marker.documentData.criminalId === criminalId
+            );
+            
+            if (relatedMarkers.length === 0) {
+                alert("No locations found for this criminal.");
+                return;
+            }
+            
+            // Add markers to map
+            relatedMarkers.forEach(marker => {
+                map.addLayer(marker);
+                visibleMarkers.push(marker);
+            });
+            
+            // If there are markers, fit map to contain all of them
+            if (relatedMarkers.length > 0) {
+                const group = L.featureGroup(relatedMarkers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Reset the map view to default
+        document.getElementById('reset-view').addEventListener('click', function() {
+            map.setView(initialView.center, initialView.zoom);
+            slider.noUiSlider.set(START_YEAR);
+        });
+
+        // Modal close button functionality
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('criminal-modal').style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('criminal-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Fetch markers when the page loads
+        fetchMarkers();
     </script>
 </body>
 </html>
