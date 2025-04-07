@@ -1,0 +1,97 @@
+<div class="crime-details">
+    <h3>{{ crime.title }}</h3>
+    <div class="detail-row">
+        <span class="label">Date:</span>
+        <span class="value">{{ crime.date }}</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="label">Location:</span>
+        <span class="value">Istanbul, Ottoman Empire</span>
+    </div>
+    
+    <div class="description">
+        <h4>Case Details:</h4>
+        <p>{{ crime.description }}</p>
+    </div>
+    
+    {% if crime.related %}
+    <div class="related-cases">
+        <h4>Related Cases:</h4>
+        <ul>
+            {% for case_id in crime.related %}
+            <li>
+                <a href="#" onclick="fetchRelatedCase('{{ case_id }}')">
+                    Case {{ case_id }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">
+        Close
+    </button>
+</div>
+
+<style>
+    .crime-details {
+        color: #333;
+    }
+    h3 {
+        color: #8B0000;
+        margin-top: 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+    .detail-row {
+        margin: 10px 0;
+        display: flex;
+    }
+    .label {
+        font-weight: bold;
+        width: 80px;
+    }
+    .value {
+        flex: 1;
+    }
+    .description {
+        margin: 15px 0;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 5px;
+    }
+    .related-cases ul {
+        padding-left: 20px;
+    }
+    .related-cases a {
+        color: #8B0000;
+        text-decoration: none;
+    }
+    .related-cases a:hover {
+        text-decoration: underline;
+    }
+    .close-btn {
+        background: #8B0000;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .close-btn:hover {
+        background: #A52A2A;
+    }
+</style>
+
+<script>
+    function fetchRelatedCase(caseId) {
+        fetch(`/crime-details/${caseId}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('crime-details').innerHTML = html;
+            });
+    }
+</script>
