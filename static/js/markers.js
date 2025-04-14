@@ -3,19 +3,32 @@ function fetchMarkers() {
     console.log("Fetching markers from Firestore...");
     db.collection('events').get().then((querySnapshot) => {
         console.log(`Found ${querySnapshot.size} events in Firestore`);
+
+        // Track the maximum year in the data
+        let maxYearInData = window.START_YEAR; // Default to the start year
+
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             const marker = createMarker(doc);
-            
+
             // Only add valid markers (with coordinates)
             if (marker) {
                 allMarkers.push(marker);
                 markerData[doc.id] = data;
+
+                // Update max year if this event has a later year
+                if (data.date && data.date.year && data.date.year > maxYearInData) {
+                    maxYearInData = data.date.year;
+                }
             }
         });
-        
+
         console.log(`Added ${allMarkers.length} valid markers to the map`);
-        
+        console.log(`Maximum year in data: ${maxYearInData}`);
+
+        // Update the time slider's end year based on the data
+        updateTimeSliderRange(maxYearInData);
+
         // Initial update after all markers are loaded
         updateMarkers();
     }).catch(error => {
@@ -28,7 +41,7 @@ function fetchMarkers() {
 function createMarker(docSnapshot, showPopup = false) {
     const data = docSnapshot.data();
     const id = docSnapshot.id;
-        
+
     // Handle coordinates whether they're stored as Geopoint or lat/lng object
     let lat, lng;
     if (data.coordinates && data.coordinates.latitude !== undefined) {
@@ -43,63 +56,80 @@ function createMarker(docSnapshot, showPopup = false) {
         console.error("Invalid coordinates for marker:", id);
         return null; // Skip this marker
     }
-    
+
     const markerType = data.type; // 'forgery', 'escape', or 'arrest'
-    
+
     // Different icons for different types of events
     let markerIcon;
+    let markerColor;
+
+    // Responsive marker size based on screen width
+    let markerSize = 14; // Default size
+    if (window.innerWidth <= 768) {
+        markerSize = 12; // Medium screens
+    }
+    if (window.innerWidth <= 480) {
+        markerSize = 10; // Small screens
+    }
+
+    // Get location name for the label
+    const locationName = data.location || 'Unknown';
+
     if (markerType === 'forgery') {
-        markerIcon = L.divIcon({
-            html: '<div style="background-color: red; width: 10px; height: 10px; border-radius: 50%;"></div>',
-            className: 'marker-icon'
-        });
+        markerColor = 'red';
     } else if (markerType === 'escape') {
-        markerIcon = L.divIcon({
-            html: '<div style="background-color: blue; width: 10px; height: 10px; border-radius: 50%;"></div>',
-            className: 'marker-icon'
-        });
+        markerColor = 'blue';
     } else if (markerType === 'arrest') {
-        markerIcon = L.divIcon({
-            html: '<div style="background-color: black; width: 10px; height: 10px; border-radius: 50%;"></div>',
-            className: 'marker-icon'
-        });
+        markerColor = 'black';
     } else {
         // Default marker for any other types
-        markerIcon = L.divIcon({
-            html: '<div style="background-color: gray; width: 10px; height: 10px; border-radius: 50%;"></div>',
-            className: 'marker-icon'
-        });
+        markerColor = 'gray';
     }
-    
+
+    // Create HTML for the marker with animation and label
+    const markerHtml = `
+        <div class="marker-container">
+            <div class="marker-dot" style="background-color: ${markerColor}; width: ${markerSize}px; height: ${markerSize}px; border-radius: 50%; animation: pulse 2s infinite;"></div>
+            <div class="marker-label">${locationName}</div>
+        </div>
+    `;
+
+    markerIcon = L.divIcon({
+        html: markerHtml,
+        className: 'marker-icon',
+        iconSize: [markerSize + 20, markerSize + 30], // Make room for the label
+        iconAnchor: [markerSize/2, markerSize/2] // Center the icon on the coordinates
+    });
+
     const marker = L.marker([lat, lng], {icon: markerIcon});
-    
+
     // Create popup content
     const popupContent = document.createElement('div');
     popupContent.className = 'marker-popup';
-    
+
     const title = document.createElement('div');
     title.className = 'marker-title';
     title.innerText = data.location || 'Untitled Location';
     popupContent.appendChild(title);
-    
+
     if (data.description && data.description.trim() !== '') {
         const description = document.createElement('div');
         description.className = 'marker-description';
         description.innerText = data.description;
         popupContent.appendChild(description);
     }
-    
+
     const typeText = document.createElement('div');
     typeText.innerText = `Type: ${markerType.charAt(0).toUpperCase() + markerType.slice(1)}`;
     popupContent.appendChild(typeText);
-    
+
     const dateText = document.createElement('div');
     let dateString = "Date: ";
     if (data.date) {
         // Format the month name based on numeric value
-        const monthNames = ["January", "February", "March", "April", "May", "June", 
+        const monthNames = ["January", "February", "March", "April", "May", "June",
                             "July", "August", "September", "October", "November", "December"];
-        
+
         if (data.date.month && data.date.day) {
             // Full date with month name, day and year
             const monthName = monthNames[data.date.month - 1] || `Month ${data.date.month}`;
@@ -114,8 +144,8 @@ function createMarker(docSnapshot, showPopup = false) {
         }
     }
     dateText.innerText = dateString;
-    popupContent.appendChild(dateText); 
-    
+    popupContent.appendChild(dateText);
+
     // Add criminal link if this marker is associated with a criminal
     if (data.criminalId) {
         const criminalLink = document.createElement('div');
@@ -123,7 +153,7 @@ function createMarker(docSnapshot, showPopup = false) {
         criminalLink.innerText = 'Show criminal details';
         criminalLink.addEventListener('click', () => showCriminalDetails(data.criminalId));
         popupContent.appendChild(criminalLink);
-        
+
         // Add related locations link
         const relatedLink = document.createElement('div');
         relatedLink.className = 'marker-link';
@@ -131,20 +161,20 @@ function createMarker(docSnapshot, showPopup = false) {
         relatedLink.addEventListener('click', () => showRelatedLocations(data.criminalId));
         popupContent.appendChild(relatedLink);
     }
-    
+
     marker.bindPopup(popupContent);
-    
+
     // Add double-click handler to show criminal details
     marker.on('dblclick', function() {
         if (data.criminalId) {
             showCriminalDetails(data.criminalId);
         }
     });
-    
+
     // Store the data with the marker for reference
     marker.documentData = data;
     marker.documentId = id;
-    
+
     return marker;
 }
 
@@ -153,23 +183,23 @@ function showRelatedLocations(criminalId) {
     // Remove all currently visible markers
     visibleMarkers.forEach(marker => map.removeLayer(marker));
     visibleMarkers = [];
-    
+
     // Find all markers related to this criminal
-    const relatedMarkers = allMarkers.filter(marker => 
+    const relatedMarkers = allMarkers.filter(marker =>
         marker.documentData.criminalId === criminalId
     );
-    
+
     if (relatedMarkers.length === 0) {
         alert("No locations found for this criminal.");
         return;
     }
-    
+
     // Add markers to map
     relatedMarkers.forEach(marker => {
         map.addLayer(marker);
         visibleMarkers.push(marker);
     });
-    
+
     // If there are markers, fit map to contain all of them
     if (relatedMarkers.length > 0) {
         const group = L.featureGroup(relatedMarkers);
