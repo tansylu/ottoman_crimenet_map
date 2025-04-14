@@ -85,14 +85,14 @@ function createMarker(docSnapshot, showPopup = false) {
     const locationName = data.location || 'Unknown';
 
     if (markerType === 'forgery') {
-        markerColor = 'red';
+        markerColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (markerType === 'escape') {
-        markerColor = 'blue';
+        markerColor = '#6B9AC4'; // Using the data-highlight variable color
     } else if (markerType === 'arrest') {
-        markerColor = 'black';
+        markerColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {
         // Default marker for any other types
-        markerColor = 'gray';
+        markerColor = '#A67B5B'; // Using the secondary variable color
     }
 
     // Create HTML for the marker with animation and label

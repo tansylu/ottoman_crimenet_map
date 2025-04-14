@@ -386,13 +386,13 @@ function createNumberedMarkerIcon(number, eventType) {
     let markerColor;
 
     if (eventType === 'forgery') {
-        markerColor = 'red';
+        markerColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (eventType === 'escape') {
-        markerColor = 'blue';
+        markerColor = '#6B9AC4'; // Using the data-highlight variable color
     } else if (eventType === 'arrest') {
-        markerColor = 'black';
+        markerColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {
-        markerColor = 'gray';
+        markerColor = '#A67B5B'; // Using the secondary variable color
     }
 
     return L.divIcon({
@@ -408,13 +408,13 @@ function createArrow(fromPoint, toPoint, eventType) {
     let arrowColor;
 
     if (eventType === 'forgery') {
-        arrowColor = '#ff0000'; // Red
+        arrowColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (eventType === 'escape') {
-        arrowColor = '#0000ff'; // Blue
+        arrowColor = '#6B9AC4'; // Using the data-highlight variable color
     } else if (eventType === 'arrest') {
-        arrowColor = '#000000'; // Black
+        arrowColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {
-        arrowColor = '#808080'; // Gray
+        arrowColor = '#A67B5B'; // Using the secondary variable color
     }
 
     // Create a polyline with arrow markers

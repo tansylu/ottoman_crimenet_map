@@ -14,10 +14,12 @@ function initBorders() {
             // Store the borders layer and add it to the map by default
             bordersLayer = L.geoJSON(data, {
                 style: {
-                    color: "#800000", // Maroon color for Ottoman borders
-                    weight: 2,
-                    opacity: 0.7,
-                    fillOpacity: 0.1
+                    color: "#4B3E2A", // Primary color for Ottoman borders
+                    weight: 2.5,
+                    opacity: 0.8,
+                    fillOpacity: 0.08,
+                    fillColor: "#A67B5B", // Secondary color for fill
+                    dashArray: '5, 5' // Dashed line style
                 },
                 onEachFeature: function(feature, layer) {
                     // Add a label to the center of the Ottoman Empire
