@@ -1,39 +1,48 @@
 // Fetch all marker data from Firestore
 function fetchMarkers() {
     console.log("Fetching markers from Firestore...");
-    db.collection('events').get().then((querySnapshot) => {
-        console.log(`Found ${querySnapshot.size} events in Firestore`);
+    return new Promise((resolve, reject) => {
+        db.collection('events').get().then((querySnapshot) => {
+            console.log(`Found ${querySnapshot.size} events in Firestore`);
 
-        // Track the maximum year in the data
-        let maxYearInData = window.START_YEAR; // Default to the start year
+            // Track the maximum year in the data
+            let maxYearInData = window.START_YEAR; // Default to the start year
 
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const marker = createMarker(doc);
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const marker = createMarker(doc);
 
-            // Only add valid markers (with coordinates)
-            if (marker) {
-                allMarkers.push(marker);
-                markerData[doc.id] = data;
+                // Only add valid markers (with coordinates)
+                if (marker) {
+                    allMarkers.push(marker);
+                    markerData[doc.id] = data;
 
-                // Update max year if this event has a later year
-                if (data.date && data.date.year && data.date.year > maxYearInData) {
-                    maxYearInData = data.date.year;
+                    // Update max year if this event has a later year
+                    if (data.date && data.date.year && data.date.year > maxYearInData) {
+                        maxYearInData = data.date.year;
+                    }
                 }
+            });
+
+            console.log(`Added ${allMarkers.length} valid markers to the map`);
+            console.log(`Maximum year in data: ${maxYearInData}`);
+
+            // Update the time slider's end year based on the data if the function exists
+            if (typeof updateTimeSliderRange === 'function') {
+                updateTimeSliderRange(maxYearInData);
             }
+
+            // Initial update after all markers are loaded if the function exists
+            if (typeof updateMarkers === 'function') {
+                updateMarkers();
+            }
+
+            resolve();
+        }).catch(error => {
+            console.error("Error fetching markers:", error);
+            alert("Error loading map data. Please try again later.");
+            reject(error);
         });
-
-        console.log(`Added ${allMarkers.length} valid markers to the map`);
-        console.log(`Maximum year in data: ${maxYearInData}`);
-
-        // Update the time slider's end year based on the data
-        updateTimeSliderRange(maxYearInData);
-
-        // Initial update after all markers are loaded
-        updateMarkers();
-    }).catch(error => {
-        console.error("Error fetching markers:", error);
-        alert("Error loading map data. Please try again later.");
     });
 }
 
