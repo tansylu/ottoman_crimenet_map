@@ -4,35 +4,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ottoman Crime Network Map</title>
+    <title>Mapping the Crime: An Analysis of a Crime Network during the Crimean War</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
     <link rel="stylesheet" href="/static/styles/main.css">
 </head>
 <body>
-    <div id="map"></div>
-    <div id="time-slider-container">
-        <div id="current-year">1854</div>
-        <div id="time-slider"></div>
-    </div>
+    <!-- Header with navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <h1 class="site-title">Mapping the Crime</h1>
+            <nav class="site-nav">
+                <ul>
+                    <li><a href="#intro" class="nav-link">Introduction</a></li>
+                    <li><a href="#network-map" class="nav-link">Network Map</a></li>
+                    <li><a href="#mobility-map" class="nav-link">Mobility Map</a></li>
+                    <li><a href="#beyoglu-map" class="nav-link">Beyoglu Map</a></li>
+                    <li><a href="#criminals-gallery" class="nav-link">Criminals Gallery</a></li>
+                    <li><a href="#legal-fight" class="nav-link">Legal Fight</a></li>
+                    <li><a href="#about-us" class="nav-link">About Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <button id="reset-view" class="reset-button">Reset View</button>
-    <button id="toggle-borders" class="map-button">Show Ottoman Borders</button>
+    <!-- Hero section with background image -->
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1>Mapping the Crime: An Analysis of a Crime Network during the Crimean War</h1>
+            <p class="subtitle">Exploring the network of forgers during a pivotal historical period</p>
+        </div>
+    </section>
 
-    <div class="legend">
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: red;"></div>
-            <span>Forgery</span>
+    <!-- Introduction Section -->
+    <section id="intro" class="section">
+        <div class="section-container">
+            <h2>The Project</h2>
+            <p>Description of the project (content and photo to be provided later)</p>
+
+            <h3>Sources and Method</h3>
+            <p>To be provided later</p>
+
+            <h3>The Crime Network of Forgers</h3>
+            <p>Introduction to the War and the atmosphere</p>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: blue;"></div>
-            <span>Escape</span>
+    </section>
+
+    <!-- Network Map Section -->
+    <section id="network-map" class="section">
+        <div class="section-container">
+            <h2>Visual Network and Relationship Map</h2>
+            <div class="map-container">
+                <!-- Network visualization will go here -->
+            </div>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: black;"></div>
-            <span>Arrest</span>
+    </section>
+
+    <!-- Mobility Map Section -->
+    <section id="mobility-map" class="section">
+        <div class="section-container">
+            <h2>Mobility of Forgers</h2>
+            <p>Interactive map showing the mobility of each forger separately</p>
+
+            <div id="map"></div>
+            <div id="time-slider-container">
+                <div id="current-year">1854</div>
+                <div id="time-slider"></div>
+            </div>
+
+            <button id="reset-view" class="reset-button">Reset View</button>
+            <button id="toggle-borders" class="map-button">Show Ottoman Borders</button>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: red;"></div>
+                    <span>Forgery</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: blue;"></div>
+                    <span>Escape</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: black;"></div>
+                    <span>Arrest</span>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Beyoglu Map Section -->
+    <section id="beyoglu-map" class="section">
+        <div class="section-container">
+            <h2>Beyoglu Historic Map</h2>
+            <p>Detailed historic map overlay of Beyoglu</p>
+            <div class="map-container">
+                <!-- Beyoglu map will go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Criminals Gallery Section -->
+    <section id="criminals-gallery" class="section">
+        <div class="section-container">
+            <h2>Criminals Gallery</h2>
+            <p>AI generated portfolio of the criminals</p>
+            <div class="gallery-container">
+                <!-- Criminal portraits will go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Legal Fight Section -->
+    <section id="legal-fight" class="section">
+        <div class="section-container">
+            <h2>Legal Fight against Forgers</h2>
+            <p>Communication network of state officers</p>
+            <div class="network-container">
+                <!-- Communication network visualization will go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about-us" class="section">
+        <div class="section-container">
+            <h2>The Research Team</h2>
+            <div class="team-container">
+                <!-- Team information will go here -->
+            </div>
+        </div>
+    </section>
 
     <!-- Modal for detailed criminal information -->
     <div id="criminal-modal" class="modal">
@@ -55,6 +156,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <!-- Application modules -->
+    <script src="/static/js/navigation.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/timeSlider.js"></script>
     <script src="/static/js/markers.js"></script>
