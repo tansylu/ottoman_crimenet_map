@@ -220,13 +220,13 @@ function displayCriminalJourney(criminalId) {
             // Determine color based on dominant type
             let markerColor;
             if (dominantType === 'forgery') {
-                markerColor = '#9E4B4B'; // Using the alert-red variable color
+                markerColor = colorConfig.forgeryColor;
             } else if (dominantType === 'escape') {
-                markerColor = '#4B6455'; // Using the forest green variable color
+                markerColor = colorConfig.escapeColor;
             } else if (dominantType === 'arrest') {
-                markerColor = '#2C2C2C'; // Using the neutral-dark variable color
+                markerColor = colorConfig.arrestColor;
             } else {
-                markerColor = '#6A5D4D'; // Brown for mixed types
+                markerColor = colorConfig.mixedColor; // Brown for mixed types
             }
 
             // Create custom cluster icon with count and numbers of contained events
@@ -386,13 +386,13 @@ function createNumberedMarkerIcon(number, eventType) {
     let markerColor;
 
     if (eventType === 'forgery') {
-        markerColor = '#9E4B4B'; // Using the alert-red variable color
+        markerColor = colorConfig.forgeryColor;
     } else if (eventType === 'escape') {
-        markerColor = '#4B6455'; // Using the forest green variable color
+        markerColor = colorConfig.escapeColor;
     } else if (eventType === 'arrest') {
-        markerColor = '#2C2C2C'; // Using the neutral-dark variable color
+        markerColor = colorConfig.arrestColor;
     } else {
-        markerColor = '#A67B5B'; // Using the secondary variable color
+        markerColor = colorConfig.secondary;
     }
 
     return L.divIcon({
@@ -408,13 +408,13 @@ function createArrow(fromPoint, toPoint, eventType) {
     let arrowColor;
 
     if (eventType === 'forgery') {
-        arrowColor = '#9E4B4B'; // Using the alert-red variable color
+        arrowColor = colorConfig.forgeryColor;
     } else if (eventType === 'escape') {
-        arrowColor = '#4B6455'; // Using the forest green variable color
+        arrowColor = colorConfig.escapeColor;
     } else if (eventType === 'arrest') {
-        arrowColor = '#2C2C2C'; // Using the neutral-dark variable color
+        arrowColor = colorConfig.arrestColor;
     } else {
-        arrowColor = '#A67B5B'; // Using the secondary variable color
+        arrowColor = colorConfig.secondary;
     }
 
     // Create a polyline with arrow markers

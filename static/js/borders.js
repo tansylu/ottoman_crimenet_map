@@ -14,11 +14,11 @@ function initBorders() {
             // Store the borders layer and add it to the map by default
             bordersLayer = L.geoJSON(data, {
                 style: {
-                    color: "#4B3E2A", // Primary color for Ottoman borders
+                    color: colorConfig.borderColor, // Primary color for Ottoman borders
                     weight: 2.5,
                     opacity: 0.8,
                     fillOpacity: 0.08,
-                    fillColor: "#A67B5B", // Secondary color for fill
+                    fillColor: colorConfig.borderFill, // Secondary color for fill
                     dashArray: '5, 5' // Dashed line style
                 },
                 onEachFeature: function(feature, layer) {
