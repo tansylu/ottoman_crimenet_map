@@ -101,7 +101,13 @@ function createMarker(docSnapshot, showPopup = false) {
         iconAnchor: [markerSize/2, markerSize/2] // Center the icon on the coordinates
     });
 
-    const marker = L.marker([lat, lng], {icon: markerIcon});
+    // Create the marker with custom icon
+    const marker = L.marker([lat, lng], {
+        icon: markerIcon,
+        // Add additional properties for clustering
+        riseOnHover: true, // Bring to front on hover
+        title: locationName // Tooltip on hover
+    });
 
     // Create popup content
     const popupContent = document.createElement('div');
@@ -175,13 +181,18 @@ function createMarker(docSnapshot, showPopup = false) {
     marker.documentData = data;
     marker.documentId = id;
 
+    // Store the location name and type for clustering purposes
+    marker.locationName = locationName;
+    marker.markerType = markerType;
+    marker.markerColor = markerColor;
+
     return marker;
 }
 
 // Show all related locations for a criminal
 function showRelatedLocations(criminalId) {
-    // Remove all currently visible markers
-    visibleMarkers.forEach(marker => map.removeLayer(marker));
+    // Clear the cluster group
+    markerClusterGroup.clearLayers();
     visibleMarkers = [];
 
     // Find all markers related to this criminal
@@ -194,13 +205,13 @@ function showRelatedLocations(criminalId) {
         return;
     }
 
-    // Add markers to map
+    // Add markers to cluster group
     relatedMarkers.forEach(marker => {
-        map.addLayer(marker);
+        markerClusterGroup.addLayer(marker);
         visibleMarkers.push(marker);
     });
 
-    // If there are markers, fit map to contain all of them
+    // We still want to fit the map for related locations (but not for year changes)
     if (relatedMarkers.length > 0) {
         const group = L.featureGroup(relatedMarkers);
         map.fitBounds(group.getBounds().pad(0.1));

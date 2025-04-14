@@ -257,6 +257,51 @@ body {
     pointer-events: none;
 }
 
+/* Custom cluster icon styles */
+.custom-cluster-icon {
+    background-color: transparent;
+    text-align: center;
+}
+
+.cluster-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3498db, #e74c3c);
+    animation: pulse-cluster 2s infinite;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.cluster-small {
+    font-size: 13px;
+    width: 34px;
+    height: 34px;
+}
+
+.cluster-medium {
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+}
+
+.cluster-large {
+    font-size: 18px;
+    width: 46px;
+    height: 46px;
+}
+
+@keyframes pulse-cluster {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+
 /* Responsive styles */
 @media screen and (max-width: 768px) {
     #map {
