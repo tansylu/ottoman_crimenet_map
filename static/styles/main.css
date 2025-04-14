@@ -1,0 +1,129 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+#map {
+    height: calc(100vh - 100px);
+    width: 100%;
+}
+#time-slider-container {
+    height: 80px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+#time-slider {
+    margin: 10px 20px;
+    height: 20px;
+}
+#current-year {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.marker-popup {
+    max-width: 300px;
+}
+.marker-details {
+    padding: 10px;
+}
+.marker-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.marker-description {
+    margin-bottom: 5px;
+}
+.marker-link {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+}
+.modal-content {
+    background-color: #f8f8f8;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover {
+    color: black;
+}
+.legend {
+    position: absolute;
+    bottom: 110px;
+    right: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    z-index: 500;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.reset-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 500;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.reset-button:hover {
+    background: #f0f0f0;
+}
+.map-button {
+    position: absolute;
+    z-index: 500;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.map-button:hover {
+    background: #f0f0f0;
+}
+#reset-view {
+    top: 10px;
+    right: 10px;
+}
+#toggle-borders {
+    top: 10px;
+    right: 120px;
+}
