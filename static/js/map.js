@@ -48,38 +48,139 @@ function initMap() {
     // Initialize the marker cluster group with custom options
     markerClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false, // Don't show the area covered by the cluster
-        maxClusterRadius: 60, // Larger radius means more aggressive clustering
+        maxClusterRadius: 30, // Further reduced radius for less aggressive clustering
         spiderfyOnMaxZoom: true, // Allow clicking on a cluster at max zoom to spread out its markers
-        zoomToBoundsOnClick: true, // Zoom when a cluster is clicked
+        zoomToBoundsOnClick: false, // We'll handle zoom behavior ourselves
+        disableClusteringAtZoom: 14, // Disable clustering at lower zoom levels to show individual markers sooner
+        spiderfyDistanceMultiplier: 3, // Spread markers much further when spiderfying
+        spiderfyOnMaxZoom: true, // Always spiderfy at max zoom
+        animate: false, // Disable animation for more immediate response
         iconCreateFunction: function(cluster) {
             // Count markers in the cluster
             const count = cluster.getChildCount();
+
+            // Get marker types in this cluster to determine color
+            const markers = cluster.getAllChildMarkers();
+            let hasMultipleTypes = false;
+            let dominantType = '';
+
+            // Check if cluster has multiple event types
+            if (markers.length > 0) {
+                const types = {};
+                markers.forEach(marker => {
+                    if (marker.markerType) {
+                        types[marker.markerType] = (types[marker.markerType] || 0) + 1;
+                    }
+                });
+
+                // Find the dominant type
+                let maxCount = 0;
+                for (const type in types) {
+                    if (types[type] > maxCount) {
+                        maxCount = types[type];
+                        dominantType = type;
+                    }
+                }
+
+                // Check if there are multiple types
+                hasMultipleTypes = Object.keys(types).length > 1;
+            }
 
             // Determine size based on count
             let size = 'small';
             if (count > 3) size = 'medium';
             if (count > 6) size = 'large';
 
+            // Determine color based on dominant type or use mixed for multiple types
+            let colorClass = 'mixed';
+            if (!hasMultipleTypes && dominantType) {
+                colorClass = dominantType;
+            }
+
             // Create custom cluster icon with count
             return L.divIcon({
-                html: `<div class="cluster-icon cluster-${size}">${count}</div>`,
+                html: `<div class="cluster-icon cluster-${size} cluster-${colorClass}">${count}</div>`,
                 className: 'custom-cluster-icon',
-                iconSize: L.point(46, 46)
+                iconSize: L.point(50, 50)
             });
         },
         // Animate clusters when zooming
         animate: true,
-        animateAddingMarkers: true,
-        disableClusteringAtZoom: 15 // Disable clustering at very high zoom levels
+        animateAddingMarkers: true
     });
 
     // Add the cluster group to the map
     map.addLayer(markerClusterGroup);
 
+    // Add custom event handler for cluster clicks to enhance zoom behavior
+    markerClusterGroup.on('clusterclick', function(event) {
+        // Get the cluster that was clicked
+        const cluster = event.layer;
+        const markers = cluster.getAllChildMarkers();
+        const clusterBounds = cluster.getBounds();
+
+        console.log(`Cluster clicked with ${markers.length} markers`);
+
+        // For all clusters, we'll handle the zoom ourselves to ensure markers are shown
+        const zoom = map.getBoundsZoom(clusterBounds);
+
+        // Calculate appropriate zoom level based on cluster size - using more conservative zoom
+        let targetZoom;
+        if (markers.length <= 3) {
+            // For very small clusters, zoom in moderately
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        } else if (markers.length <= 10) {
+            // For medium clusters, zoom in slightly
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        } else {
+            // For large clusters, zoom in minimally
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        }
+
+        // If we're already at or beyond the target zoom, force spiderfy
+        if (map.getZoom() >= targetZoom) {
+            // Force spiderfy immediately
+            cluster.spiderfy();
+            return true; // Allow default behavior
+        }
+
+        // If the cluster has few markers, consider spiderfying directly instead of zooming
+        if (markers.length <= 5) {
+            // For small clusters, just spiderfy directly without zooming
+            cluster.spiderfy();
+            return true; // Allow default behavior
+        }
+
+        // Otherwise zoom to the appropriate level
+        const center = clusterBounds.getCenter();
+
+        // After zooming, check if we need to spiderfy
+        map.once('zoomend', function() {
+            // If the cluster is still visible after zooming (hasn't been broken up)
+            // and we're at max zoom, spiderfy it
+            if (map.getZoom() === map.getMaxZoom() || map.getZoom() >= 18) {
+                setTimeout(function() {
+                    // This timeout gives the clustering algorithm time to update
+                    if (cluster._icon && cluster._icon.parentNode) {
+                        cluster.spiderfy();
+                    }
+                }, 300);
+            }
+        });
+
+        // Perform the zoom
+        map.setView(center, targetZoom, {animate: true});
+
+        // Prevent default behavior as we're handling it ourselves
+        return false;
+    });
+
     // Reset view button functionality
     document.getElementById('reset-view').addEventListener('click', function() {
         map.setView(initialView.center, initialView.zoom);
-        timeSlider.noUiSlider.set(START_YEAR);
+        if (typeof timeSlider !== 'undefined' && timeSlider.noUiSlider) {
+            timeSlider.noUiSlider.set(START_YEAR);
+        }
     });
 }
 
@@ -99,11 +200,35 @@ function updateMarkers() {
     allMarkers.forEach(marker => {
         const data = marker.documentData;
         if (data.date && data.date.year === currentYear) {
+            // Store marker type for clustering
+            if (data.type) {
+                marker.markerType = data.type;
+            }
+
             markerClusterGroup.addLayer(marker);
             visibleMarkers.push(marker);
         }
     });
 
+    // Check if we have overlapping markers at the same location
+    const locationGroups = {};
+    visibleMarkers.forEach(marker => {
+        const key = `${marker.getLatLng().lat.toFixed(5)},${marker.getLatLng().lng.toFixed(5)}`;
+        if (!locationGroups[key]) {
+            locationGroups[key] = [];
+        }
+        locationGroups[key].push(marker);
+    });
+
+    // Log clustering information
+    let clusteredLocations = 0;
+    for (const key in locationGroups) {
+        if (locationGroups[key].length > 1) {
+            clusteredLocations++;
+            console.log(`Found ${locationGroups[key].length} markers at location ${key}`);
+        }
+    }
+
     // Log the number of visible markers for the current year
-    console.log(`Showing ${visibleMarkers.length} markers for year ${currentYear}`);
+    console.log(`Showing ${visibleMarkers.length} markers for year ${currentYear} with ${clusteredLocations} clustered locations`);
 }

@@ -181,6 +181,105 @@ function displayCriminalJourney(criminalId) {
     // Create a layer group for the journey
     criminalJourneyLayer = L.layerGroup().addTo(map);
 
+    // Create a cluster group specifically for the criminal journey
+    const journeyClusterGroup = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        maxClusterRadius: 20, // Even smaller radius for criminal journey to show more detail
+        spiderfyOnMaxZoom: true,
+        zoomToBoundsOnClick: false, // We'll handle zoom behavior ourselves
+        disableClusteringAtZoom: 14, // Disable clustering at lower zoom levels
+        spiderfyDistanceMultiplier: 3, // Spread markers much further when spiderfying
+        spiderfyOnMaxZoom: true, // Always spiderfy at max zoom
+        animate: false, // Disable animation for more immediate response
+        iconCreateFunction: function(cluster) {
+            // Count markers in the cluster
+            const count = cluster.getChildCount();
+
+            // Get marker types in this cluster
+            const markers = cluster.getAllChildMarkers();
+            let dominantType = '';
+
+            // Find the dominant event type
+            if (markers.length > 0) {
+                const types = {};
+                markers.forEach(marker => {
+                    if (marker.eventType) {
+                        types[marker.eventType] = (types[marker.eventType] || 0) + 1;
+                    }
+                });
+
+                let maxCount = 0;
+                for (const type in types) {
+                    if (types[type] > maxCount) {
+                        maxCount = types[type];
+                        dominantType = type;
+                    }
+                }
+            }
+
+            // Determine color based on dominant type
+            let markerColor;
+            if (dominantType === 'forgery') {
+                markerColor = 'red';
+            } else if (dominantType === 'escape') {
+                markerColor = 'blue';
+            } else if (dominantType === 'arrest') {
+                markerColor = 'black';
+            } else {
+                markerColor = 'purple'; // Mixed or unknown
+            }
+
+            // Create custom cluster icon with count and numbers of contained events
+            return L.divIcon({
+                html: `<div class="marker-number" style="background-color: ${markerColor}; width: 36px; height: 36px;">${count}</div>`,
+                className: 'custom-numbered-marker',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+        }
+    });
+
+    // Add the journey cluster group to the journey layer
+    criminalJourneyLayer.addLayer(journeyClusterGroup);
+
+    // Add custom event handler for journey cluster clicks
+    journeyClusterGroup.on('clusterclick', function(event) {
+        // Get the cluster that was clicked
+        const cluster = event.layer;
+        const markers = cluster.getAllChildMarkers();
+        const clusterBounds = cluster.getBounds();
+
+        console.log(`Journey cluster clicked with ${markers.length} events`);
+
+        // For all clusters, we'll handle the zoom ourselves to ensure markers are shown
+        const zoom = map.getBoundsZoom(clusterBounds);
+
+        // Calculate appropriate zoom level based on cluster size - using more conservative zoom
+        let targetZoom;
+        if (markers.length <= 3) {
+            // For very small clusters, zoom in moderately
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        } else if (markers.length <= 10) {
+            // For medium clusters, zoom in slightly
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        } else {
+            // For large clusters, zoom in minimally
+            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
+        }
+
+        // If we're already at or beyond the target zoom, force spiderfy
+        if (map.getZoom() >= targetZoom) {
+            // Force spiderfy immediately
+            cluster.spiderfy();
+            return true; // Allow default behavior
+        }
+
+        // For criminal journey, we prefer to spiderfy directly for better visualization
+        // Just spiderfy all clusters without zooming
+        cluster.spiderfy();
+        return true; // Allow default behavior
+    });
+
     // Add markers for each event
     const eventMarkers = [];
     criminalEvents.forEach((event, index) => {
@@ -203,6 +302,9 @@ function displayCriminalJourney(criminalId) {
             icon: markerIcon,
             riseOnHover: true
         });
+
+        // Store event type for clustering
+        marker.eventType = event.type;
 
         // Create popup content
         const popupContent = document.createElement('div');
@@ -246,7 +348,7 @@ function displayCriminalJourney(criminalId) {
         popupContent.appendChild(dateText);
 
         marker.bindPopup(popupContent);
-        criminalJourneyLayer.addLayer(marker);
+        journeyClusterGroup.addLayer(marker); // Add to cluster group instead of directly to layer
         eventMarkers.push(marker);
 
         // Draw arrow to next event if not the last one

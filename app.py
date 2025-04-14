@@ -32,4 +32,4 @@ def criminals_map():
     return render_template('criminals_map.html', firebase_config=firebase_config)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5003)
