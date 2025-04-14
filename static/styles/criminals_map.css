@@ -1,0 +1,147 @@
+/* Styles specific to the criminals map view */
+
+/* Override the map height to be full height since we don't have a time slider */
+#map {
+    height: 100vh !important;
+}
+
+#criminal-selector-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+}
+
+#criminal-selector {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+/* Navigation styles moved to main.css */
+
+.info-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.info-panel h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.event-item {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dotted #ddd;
+}
+
+.event-date {
+    font-weight: bold;
+    color: #555;
+}
+
+.event-location {
+    font-style: italic;
+}
+
+.event-type {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.event-type-forgery {
+    background-color: rgba(255, 0, 0, 0.2);
+    color: darkred;
+}
+
+.event-type-escape {
+    background-color: rgba(0, 0, 255, 0.2);
+    color: darkblue;
+}
+
+.event-type-arrest {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: black;
+}
+
+/* Arrow styles */
+.leaflet-canvas-icon {
+    pointer-events: none;
+}
+
+/* Numbered marker styles */
+.custom-numbered-marker {
+    background: none;
+    border: none;
+}
+
+.marker-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    border: 2px solid white;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+    #criminal-selector-container {
+        max-width: 250px;
+    }
+
+    .info-panel {
+        max-width: 250px;
+        max-height: 200px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #criminal-selector-container {
+        max-width: 200px;
+        padding: 8px;
+    }
+
+    #criminal-selector {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .info-panel {
+        max-width: 200px;
+        max-height: 150px;
+        padding: 10px;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}
