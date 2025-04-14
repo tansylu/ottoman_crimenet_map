@@ -7,7 +7,7 @@
 
 #criminal-selector-container {
     position: absolute;
-    top: 10px;
+    top: 70px;
     left: 10px;
     z-index: 1000;
     background-color: var(--neutral-light);
@@ -111,9 +111,9 @@
 }
 
 .event-type-escape {
-    background-color: rgba(107, 154, 196, 0.15);
-    color: var(--data-highlight);
-    border: 1px solid rgba(107, 154, 196, 0.3);
+    background-color: rgba(75, 100, 85, 0.15);
+    color: #4B6455;
+    border: 1px solid rgba(75, 100, 85, 0.3);
 }
 
 .event-type-arrest {

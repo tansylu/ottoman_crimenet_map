@@ -28,16 +28,16 @@ function initBorders() {
 
                     // Create a label with the empire name and year
                     // Responsive label size based on screen width
-                    let labelWidth = 200;
-                    let labelHeight = 40;
+                    let labelWidth = 220;
+                    let labelHeight = 50;
 
                     if (window.innerWidth <= 768) {
-                        labelWidth = 160;
-                        labelHeight = 35;
+                        labelWidth = 180;
+                        labelHeight = 40;
                     }
                     if (window.innerWidth <= 480) {
-                        labelWidth = 120;
-                        labelHeight = 30;
+                        labelWidth = 140;
+                        labelHeight = 35;
                     }
 
                     const label = L.marker(center, {

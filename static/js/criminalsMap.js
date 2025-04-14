@@ -220,13 +220,13 @@ function displayCriminalJourney(criminalId) {
             // Determine color based on dominant type
             let markerColor;
             if (dominantType === 'forgery') {
-                markerColor = 'red';
+                markerColor = '#9E4B4B'; // Using the alert-red variable color
             } else if (dominantType === 'escape') {
-                markerColor = 'blue';
+                markerColor = '#4B6455'; // Using the forest green variable color
             } else if (dominantType === 'arrest') {
-                markerColor = 'black';
+                markerColor = '#2C2C2C'; // Using the neutral-dark variable color
             } else {
-                markerColor = 'purple'; // Mixed or unknown
+                markerColor = '#6A5D4D'; // Brown for mixed types
             }
 
             // Create custom cluster icon with count and numbers of contained events
@@ -388,7 +388,7 @@ function createNumberedMarkerIcon(number, eventType) {
     if (eventType === 'forgery') {
         markerColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (eventType === 'escape') {
-        markerColor = '#6B9AC4'; // Using the data-highlight variable color
+        markerColor = '#4B6455'; // Using the forest green variable color
     } else if (eventType === 'arrest') {
         markerColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {
@@ -410,7 +410,7 @@ function createArrow(fromPoint, toPoint, eventType) {
     if (eventType === 'forgery') {
         arrowColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (eventType === 'escape') {
-        arrowColor = '#6B9AC4'; // Using the data-highlight variable color
+        arrowColor = '#4B6455'; // Using the forest green variable color
     } else if (eventType === 'arrest') {
         arrowColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {

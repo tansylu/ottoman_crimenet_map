@@ -87,7 +87,7 @@ function createMarker(docSnapshot, showPopup = false) {
     if (markerType === 'forgery') {
         markerColor = '#9E4B4B'; // Using the alert-red variable color
     } else if (markerType === 'escape') {
-        markerColor = '#6B9AC4'; // Using the data-highlight variable color
+        markerColor = '#4B6455'; // Using the forest green variable color
     } else if (markerType === 'arrest') {
         markerColor = '#2C2C2C'; // Using the neutral-dark variable color
     } else {
@@ -106,8 +106,8 @@ function createMarker(docSnapshot, showPopup = false) {
     markerIcon = L.divIcon({
         html: markerHtml,
         className: 'marker-icon',
-        iconSize: [markerSize + 20, markerSize + 30], // Make room for the label
-        iconAnchor: [markerSize/2, markerSize/2] // Center the icon on the coordinates
+        iconSize: [Math.max(markerSize + 20, 120), markerSize + 50], // Make room for the label, ensure minimum width
+        iconAnchor: [Math.max(markerSize + 20, 120)/2, markerSize/2] // Center the icon on the coordinates
     });
 
     // Create the marker with custom icon

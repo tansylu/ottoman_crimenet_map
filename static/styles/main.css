@@ -5,14 +5,14 @@
     --accent: #D4C4A8; /* Parchment */
     --neutral-light: #F5F1EB; /* Antique White */
     --neutral-dark: #2C2C2C; /* Dark Gray */
-    --data-highlight: #6B9AC4; /* Desaturated Blue */
+    --data-highlight: #4B6455; /* Forest Green - replacing blue */
     --alert-red: #9E4B4B; /* Faded Crimson */
 
     /* Event Type Colors */
     --forgery-color: var(--alert-red);
     --escape-color: var(--data-highlight);
     --arrest-color: var(--neutral-dark);
-    --mixed-color: #8E44AD; /* Purple for mixed types */
+    --mixed-color: #6A5D4D; /* Brown for mixed types - replacing purple */
 }
 
 body {
@@ -34,7 +34,7 @@ h1, h2, h3, h4, h5, h6 {
 #view-navigation {
     position: absolute;
     top: 10px;
-    right: 10px;
+    left: 10px;
     z-index: 1000;
     background-color: var(--neutral-light);
     padding: 8px;
@@ -155,7 +155,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 .noUi-connect {
-    background: linear-gradient(to right, var(--data-highlight), var(--alert-red));
+    background: linear-gradient(to right, #4B6455, #A67B5B);
 }
 .noUi-handle {
     border-radius: 50%;
@@ -189,6 +189,18 @@ h1, h2, h3, h4, h5, h6 {
 .marker-popup {
     max-width: 320px;
     font-family: 'Inter', sans-serif;
+    width: 100%;
+}
+
+/* Override Leaflet's default popup styles for better responsiveness */
+.leaflet-popup-content {
+    margin: 10px;
+    width: auto !important;
+    max-width: 100%;
+}
+
+.leaflet-popup {
+    max-width: 90vw;
 }
 .marker-details {
     padding: 12px;
@@ -327,7 +339,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 #toggle-borders {
     top: 10px;
-    right: 130px;
+    right: 120px;
 }
 
 .marker-icon {
@@ -338,15 +350,22 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--neutral-light);
     border: 1px solid var(--accent);
     border-radius: 6px;
-    padding: 3px 6px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
-    white-space: nowrap;
+    white-space: normal;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     pointer-events: none;
     color: var(--primary);
     margin-top: 3px;
+    max-width: 100px;
+    text-align: center;
+    line-height: 1.2;
+    word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .marker-dot {
     transition: all 0.3s ease;
@@ -366,9 +385,9 @@ h1, h2, h3, h4, h5, h6 {
 .ottoman-label div {
     background-color: rgba(75, 62, 42, 0.85);
     color: var(--neutral-light);
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'Playfair Display', serif;
     font-weight: bold;
     text-align: center;
@@ -377,6 +396,12 @@ h1, h2, h3, h4, h5, h6 {
     pointer-events: none;
     border: 1px solid rgba(212, 196, 168, 0.5);
     letter-spacing: 0.5px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 /* Custom cluster icon styles */
@@ -396,7 +421,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--data-highlight), var(--secondary));
+    background: linear-gradient(135deg, #4B6455, var(--secondary));
     animation: pulse-cluster 2.5s infinite;
     border: 2px solid var(--neutral-light);
     cursor: pointer; /* Make it clear it's clickable */
@@ -415,7 +440,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cluster-escape {
-    background: linear-gradient(135deg, var(--data-highlight), var(--primary));
+    background: linear-gradient(135deg, #4B6455, var(--primary));
 }
 
 .cluster-arrest {
@@ -423,7 +448,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cluster-mixed {
-    background: linear-gradient(135deg, var(--mixed-color), var(--secondary));
+    background: linear-gradient(135deg, #6A5D4D, var(--secondary));
 }
 
 .cluster-small {
@@ -496,6 +521,11 @@ h1, h2, h3, h4, h5, h6 {
     border: 2px solid var(--neutral-light) !important;
 }
 
+/* Custom map styling */
+.historical-map-tiles {
+    filter: sepia(30%) saturate(70%) brightness(95%) contrast(90%);
+}
+
 /* Responsive styles */
 @media screen and (max-width: 768px) {
     #map {
@@ -540,12 +570,15 @@ h1, h2, h3, h4, h5, h6 {
 
     .marker-label {
         font-size: 8px;
-        padding: 1px 3px;
+        padding: 2px 4px;
+        max-width: 80px;
     }
 
     .ottoman-label div {
         font-size: 12px;
         padding: 3px 6px;
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -593,5 +626,30 @@ h1, h2, h3, h4, h5, h6 {
     .modal-content {
         width: 95%;
         margin: 5% auto;
+    }
+
+    .marker-label {
+        font-size: 7px;
+        padding: 2px 3px;
+        max-width: 60px;
+        line-height: 1.1;
+    }
+
+    .ottoman-label div {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+
+    /* Improve popup readability on small screens */
+    .marker-popup {
+        max-width: 250px;
+    }
+
+    .marker-title {
+        font-size: 14px;
+    }
+
+    .marker-description {
+        font-size: 12px;
     }
 }
