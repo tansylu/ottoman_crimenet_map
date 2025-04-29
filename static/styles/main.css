@@ -5,11 +5,12 @@ body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     color: #333;
+    background-color: #ffffff;
 }
 
 /* Header Styles */
 .site-header {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: #00008B; /* Dark Blue */
     position: fixed;
     top: 0;
     left: 0;
@@ -95,8 +96,9 @@ body {
     scroll-margin-top: 70px; /* For smooth scrolling with fixed header */
 }
 
-.section:nth-child(even) {
-    background-color: #f9f9f9;
+/* All sections have white background */
+.section {
+    background-color: #ffffff;
 }
 
 .section-container {
@@ -108,13 +110,17 @@ body {
     text-align: center;
     margin-bottom: 40px;
     font-size: 2rem;
-    color: #333;
+    color: #ffffff;
+    background-color: #8B4513; /* SaddleBrown */
+    padding: 15px;
+    border-radius: 5px;
 }
 
 .section h3 {
     font-size: 1.5rem;
     margin-top: 30px;
     margin-bottom: 15px;
+    color: #00008B; /* Dark Blue */
 }
 
 /* Map Container */
