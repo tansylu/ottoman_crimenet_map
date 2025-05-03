@@ -157,6 +157,69 @@ body {
     gap: 30px;
     margin-top: 30px;
 }
+
+/* Supervisor Container */
+.supervisor-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+/* Team Member Card */
+.team-member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.member-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 3px solid #00008B;
+}
+
+.member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.member-info {
+    text-align: center;
+    width: 100%;
+}
+
+.member-name {
+    margin: 0 0 10px 0;
+    color: #00008B;
+    font-size: 1.2rem;
+}
+
+.member-title {
+    margin: 0 0 5px 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.member-institution {
+    margin: 0;
+    color: #777;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
 #map {
     height: 500px;
     width: 100%;
