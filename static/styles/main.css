@@ -22,7 +22,7 @@ body {
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 20px;
+    padding: 15px 20px; /* Increased vertical padding from 10px to 15px */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -42,15 +42,16 @@ body {
 }
 
 .site-nav li {
-    margin-left: 20px;
+    margin-left: 25px; /* Increased from 20px to 25px for better spacing */
 }
 
 .site-nav a {
     color: #fff;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 1.1rem; /* Increased from 0.9rem to 1.1rem */
     padding: 5px 0;
     transition: color 0.3s;
+    font-weight: 500; /* Added medium font weight for better visibility */
 }
 
 .site-nav a:hover {
@@ -93,7 +94,7 @@ body {
 /* Section Styles */
 .section {
     padding: 80px 20px;
-    scroll-margin-top: 70px; /* For smooth scrolling with fixed header */
+    scroll-margin-top: 80px; /* Increased from 70px to 80px to account for taller header */
 }
 
 /* All sections have white background */
@@ -265,4 +266,103 @@ body {
 }
 .reset-button:hover, .map-button:hover {
     background: #f0f0f0;
+}
+
+/* Image Container Styles */
+.image-container {
+    max-width: 100%;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.image-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 5px;
+}
+
+.image-caption {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 8px;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Side by side images */
+.image-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.image-container.side-by-side {
+    width: 48%; /* Slightly less than 50% to account for spacing */
+    margin: 0;
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 768px) {
+    .image-container.side-by-side {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+/* Timeline Styles */
+.timeline-container {
+    position: relative;
+    max-width: 100%;
+    margin: 20px 0 40px;
+    padding-left: 20px;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #00008B; /* Dark Blue to match header */
+    border-radius: 1px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #8B4513; /* SaddleBrown to match section headers */
+    border: 2px solid #fff;
+    z-index: 1;
+}
+
+.timeline-date {
+    font-weight: bold;
+    color: #00008B; /* Dark Blue */
+    margin-bottom: 5px;
+}
+
+.timeline-content {
+    color: #333;
+    line-height: 1.5;
+}
+
+h4 {
+    font-size: 1.3rem;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    color: #00008B; /* Dark Blue to match h3 */
 }
