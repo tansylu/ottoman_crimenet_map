@@ -141,6 +141,84 @@ body {
     margin-top: 30px;
 }
 
+/* Criminals Table Styles */
+.criminals-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 30px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.criminals-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    font-size: 0.95rem;
+}
+
+.criminals-table th,
+.criminals-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.criminals-table th {
+    background-color: #00008B;
+    color: #fff;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.criminals-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.criminals-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Criminal Portrait Card */
+.criminal-portrait-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.criminal-portrait-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.portrait-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.portrait-info {
+    padding: 15px;
+}
+
+.portrait-name {
+    margin: 0 0 8px 0;
+    color: #00008B;
+    font-size: 1.1rem;
+}
+
+.portrait-description {
+    margin: 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
 /* Network Container */
 .network-container {
     width: 100%;

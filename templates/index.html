@@ -177,6 +177,13 @@
             <!-- Network Map Subsection -->
             <h3>Network Map</h3>
             <p>Visual network and relationship map of the forgers</p>
+            <div class="map-container">
+                <!-- Network visualization will go here -->
+            </div>
+
+            <!-- Mobility Map Subsection -->
+            <h3>Mobility Map</h3>
+            <p>Interactive map showing the mobility of each forger separately</p>
             <div id="map"></div>
             <div id="time-slider-container">
                 <div id="current-year">1854</div>
@@ -201,13 +208,6 @@
                 </div>
             </div>
 
-            <!-- Mobility Map Subsection -->
-            <h3>Mobility Map</h3>
-            <p>Interactive map showing the mobility of each forger separately</p>
-            <div class="map-container">
-                <!-- Additional mobility visualizations will go here -->
-            </div>
-
             <!-- Beyoglu Map Subsection -->
             <h3>Beyoglu Map</h3>
             <p>Detailed historic map overlay of Beyoglu</p>
@@ -221,9 +221,33 @@
     <section id="criminals-gallery" class="section">
         <div class="section-container">
             <h2>Portfolio of Criminals</h2>
-            <p>AI generated portfolio of the criminals</p>
-            <div class="gallery-container">
-                <!-- Criminal portraits will go here -->
+            <p>Comprehensive information about the criminals involved in the forgery network</p>
+
+            <!-- Criminal Information Table -->
+            <h3>Criminal Records</h3>
+            <div class="criminals-table-container">
+                <table class="criminals-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Birth Date</th>
+                            <th>Birthplace</th>
+                            <th>Nationality</th>
+                            <th>Occupation</th>
+                            <th>Place of Arrest</th>
+                        </tr>
+                    </thead>
+                    <tbody id="criminals-table-body">
+                        <!-- Criminal data will be populated here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- AI-Generated Portraits -->
+            <h3>Criminal Portraits</h3>
+            <p>AI-generated drawings based on physical descriptions (portrait parlé)</p>
+            <div class="gallery-container" id="criminal-portraits">
+                <!-- AI-generated portraits will be populated here via JavaScript -->
             </div>
         </div>
     </section>
