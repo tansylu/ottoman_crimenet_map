@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const app = firebase.initializeApp(firebaseConfig);
     const db = app.firestore();
 
-    // Network color mapping
+    // Network color mapping (keeping original colors)
     const colors = {
         "network_1": "#e74c3c", // Red
         "network_2": "#3498db", // Blue
@@ -18,33 +18,76 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Network descriptions (will be updated from Firestore if available)
     let networkDescriptions = {
-        "network_1": "Primary forgery network",
-        "network_2": "Secondary criminal group",
-        "network_3": "Support network",
-        "network_4": "Distribution network",
-        "network_5": "Financial network",
-        "network_6": "Peripheral associates",
-        "unknown": "Unknown network"
+        "network_1": "Primary Forgery Network",
+        "network_2": "Secondary Criminal Group",
+        "network_3": "Support Network",
+        "network_4": "Distribution Network",
+        "network_5": "Financial Network",
+        "network_6": "Peripheral Associates",
+        "unknown": "Unknown Network"
     };
+
+    // Update button text with descriptions
+    document.addEventListener('DOMContentLoaded', function() {
+        // After network descriptions are loaded from Firestore
+        db.collection("network_descriptions").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const networkId = doc.id;
+                const description = doc.data().description;
+                
+                if (description) {
+                    networkDescriptions[networkId] = description;
+                    
+                    // Update button text
+                    const button = document.querySelector(`.filter-btn[data-network="${networkId}"]`);
+                    if (button) {
+                        button.textContent = description;
+                    }
+                }
+            });
+            
+            console.log("Network descriptions loaded:", networkDescriptions);
+        }).catch((error) => {
+            console.error("Error loading network descriptions:", error);
+        });
+    });
 
     // Initialize the map
     const map = L.map('relation-map').setView([41.0370, 28.9866], 14);
 
-    // Add the base tile layer with a brown filter for an older look
+    // Add the base tile layer with a grayscale filter for black and white look
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
-        className: 'sepia-tiles' // Add a class for styling
+        className: 'grayscale-tiles' // Add a class for styling
     }).addTo(map);
 
-    // Add CSS for the sepia filter
+    // Add CSS for the grayscale filter
     const style = document.createElement('style');
     style.textContent = `
-        .sepia-tiles {
-            filter: sepia(0.7) brightness(0.9) contrast(1.1);
+        .grayscale-tiles {
+            filter: grayscale(100%) brightness(0.9) contrast(1.1);
         }
     `;
     document.head.appendChild(style);
+
+    // Add CSS for the criminal name labels
+    const labelStyle = document.createElement('style');
+    labelStyle.textContent = `
+        .criminal-label {
+            background: none;
+            border: none;
+        }
+        .criminal-name {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+    `;
+    document.head.appendChild(labelStyle);
 
     // Initialize the modal
     const modal = document.getElementById("criminal-modal");
@@ -121,14 +164,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Create marker for this criminal
-            const marker = L.circleMarker(
+            const marker = L.marker(
                 [data.coordinates.lat, data.coordinates.lng],
                 {
-                    radius: 6, // Slightly larger radius for better visibility
-                    color: '#fff', // White border to make markers stand out on the brown filter
-                    fillColor: colors[criminal.network] || colors.unknown,
-                    fillOpacity: 1.0, // Fully opaque for better visibility
-                    weight: 2.0 // Thicker border for better visibility
+                    icon: L.divIcon({
+                        className: 'criminal-label',
+                        html: `<div class="criminal-name" style="color: ${colors[criminal.network] || colors.unknown};">${criminal.name}</div>`,
+                        iconSize: [100, 20],
+                        iconAnchor: [50, 10]
+                    })
                 }
             );
 
@@ -136,14 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
             marker.criminalId = criminalId;
             marker.network = criminal.network;
 
-            // Add tooltip that shows on hover
-            const name = data.name || criminalId;
-            marker.bindTooltip(name, {
-                permanent: false,
-                direction: 'top',
-                className: 'criminal-tooltip',
-                opacity: 0.9
-            });
+            // No need for tooltip since we're showing names directly
+            // marker.bindTooltip(name, {...});
 
             // Add click event
             marker.on('click', function() {
@@ -180,17 +218,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Create connections to closest criminals
                     closestCriminals.forEach(criminal2 => {
-                        // Create polyline connection
+                        // Create polyline connection with black solid lines for B&W theme
                         const connection = L.polyline(
                             [
                                 [criminal1.coordinates.lat, criminal1.coordinates.lng],
                                 [criminal2.coordinates.lat, criminal2.coordinates.lng]
                             ],
                             {
-                                color: colors[network] || colors.unknown,
-                                weight: 1,
-                                opacity: 0.6,
-                                dashArray: '5, 5' // Dashed line
+                                color: '#000000', // Black for B&W theme
+                                weight: 2, // Slightly thinner for cleaner look
+                                opacity: 0.7, // Slightly transparent
+                                dashArray: null // Solid line instead of dashed
                             }
                         );
 
@@ -290,23 +328,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const match = (network === 'all' || marker.network === network);
 
             if (match) {
-                // Show marker with original style
-                marker.setStyle({
-                    radius: 6, // Slightly larger radius for better visibility
-                    color: '#fff', // White border to make markers stand out
-                    fillColor: colors[marker.network] || colors.unknown,
-                    weight: 2.0, // Thicker border for better visibility
-                    fillOpacity: 1.0 // Fully opaque for better visibility
-                });
-
                 // Make sure it's on the map
                 if (!map.hasLayer(marker)) {
                     marker.addTo(map);
                 }
-
-                // Ensure tooltip is enabled
-                marker.openTooltip();
-                marker.closeTooltip();
             } else {
                 // Remove from map
                 if (map.hasLayer(marker)) {
@@ -321,7 +346,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const match = (network === 'all' || connection.network === network);
 
             if (match) {
-                // Show connection
+                // Show connection with black color for B&W theme
+                connection.setStyle({
+                    color: '#000000', // Black for B&W theme
+                    weight: 2, // Slightly thinner for cleaner look
+                    opacity: 0.7, // Slightly transparent
+                    dashArray: null // Solid line
+                });
+                
+                // Make sure it's on the map
                 if (!map.hasLayer(connection)) {
                     connection.addTo(map);
                 }
@@ -455,9 +488,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
 
                     connection.setStyle({
-                        weight: 2,
-                        opacity: 0.9,
-                        dashArray: '3, 5'
+                        weight: 4, // Increased from 2 to 4 for even bolder highlighted lines
+                        opacity: 1.0, // Fully opaque when highlighted
+                        dashArray: null // Solid line
                     });
 
                     highlightedConnections.push(connection);
@@ -504,34 +537,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to reset highlights
     function resetHighlights() {
-        // Reset highlighted markers
-        highlightedMarkers.forEach(marker => {
-            const originalStyle = originalMarkerStyles[marker.criminalId];
-            if (originalStyle) {
-                marker.setStyle(originalStyle);
-            }
-        });
-
         // Reset highlighted connections
         highlightedConnections.forEach(connection => {
             const originalStyle = originalConnectionStyles[connection._leaflet_id];
             if (originalStyle) {
                 connection.setStyle(originalStyle);
+            } else {
+                connection.setStyle({
+                    color: '#000000', // Black for B&W theme
+                    weight: 2,
+                    opacity: 0.7,
+                    dashArray: null // Solid line
+                });
             }
         });
 
-        // Reset all other markers and connections
-        allMarkers.forEach(marker => {
-            marker.setStyle({
-                fillOpacity: 0.9,
-                opacity: 1
-            });
-        });
-
+        // Reset all other connections
         connections.forEach(connection => {
-            connection.setStyle({
-                opacity: 0.6
-            });
+            if (!highlightedConnections.includes(connection)) {
+                connection.setStyle({
+                    color: '#000000', // Black for B&W theme
+                    weight: 2,
+                    opacity: 0.7,
+                    dashArray: null // Solid line
+                });
+            }
         });
 
         // Clear the arrays

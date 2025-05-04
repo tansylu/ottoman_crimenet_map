@@ -51,6 +51,7 @@
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+            max-width: 200px; /* Limit the width */
         }
 
         .network-filter button {
@@ -63,6 +64,11 @@
             font-family: 'Montserrat', sans-serif;
             font-size: 12px;
             transition: all 0.2s ease;
+            width: 180px; /* Set a fixed width for all buttons */
+            text-align: left; /* Align text to the left */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .network-filter button.active {
@@ -72,31 +78,6 @@
 
         .network-filter button:hover {
             opacity: 0.8;
-        }
-
-        .legend {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            z-index: 1001; /* Above the brown overlay */
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
         }
 
         .modal {
@@ -227,40 +208,12 @@
 
     <div class="network-filter">
         <button class="filter-btn active btn-network-all" data-network="all">All Networks</button>
-        <button class="filter-btn btn-network-1" data-network="network_1">Network 1</button>
-        <button class="filter-btn btn-network-2" data-network="network_2">Network 2</button>
-        <button class="filter-btn btn-network-3" data-network="network_3">Network 3</button>
-        <button class="filter-btn btn-network-4" data-network="network_4">Network 4</button>
-        <button class="filter-btn btn-network-5" data-network="network_5">Network 5</button>
-        <button class="filter-btn btn-network-6" data-network="network_6">Network 6</button>
-    </div>
-
-    <div class="legend">
-        <h4 style="margin-top: 0; margin-bottom: 8px;">Criminal Networks</h4>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #e74c3c;"></div>
-            <span>Network 1</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #3498db;"></div>
-            <span>Network 2</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #2ecc71;"></div>
-            <span>Network 3</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #e67e22;"></div>
-            <span>Network 4</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #9b59b6;"></div>
-            <span>Network 5</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: #8B4513;"></div>
-            <span>Network 6</span>
-        </div>
+        <button class="filter-btn btn-network-1" data-network="network_1">Primary Forgery Network</button>
+        <button class="filter-btn btn-network-2" data-network="network_2">Secondary Criminal Group</button>
+        <button class="filter-btn btn-network-3" data-network="network_3">Support Network</button>
+        <button class="filter-btn btn-network-4" data-network="network_4">Distribution Network</button>
+        <button class="filter-btn btn-network-5" data-network="network_5">Financial Network</button>
+        <button class="filter-btn btn-network-6" data-network="network_6">Peripheral Associates</button>
     </div>
 
     <div id="criminal-modal" class="modal">
