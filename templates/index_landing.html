@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/static/styles/criminals_map.css">
     <link rel="stylesheet" href="/static/styles/criminal_journeys_landing.css">
     <link rel="stylesheet" href="/static/styles/section_spacing.css">
+    <link rel="stylesheet" href="/static/styles/beyoglu_offline_map.css">
 </head>
 <body>
     <!-- Header with navigation -->
@@ -223,10 +224,7 @@
             <div class="section-subtitle-wrapper">
                 <h3>Beyoglu Map</h3>
             </div>
-            <p>Detailed historic map overlay of Beyoglu</p>
-            <div class="map-container">
-                <!-- Beyoglu map will go here -->
-            </div>
+            {% include 'beyoglu_map_content_new.html' %}
         </div>
     </section>
 
