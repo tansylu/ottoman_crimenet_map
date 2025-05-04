@@ -125,22 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Initialize smooth scrolling for navigation links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80, // Adjust for header height
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        console.log("Navigation links initialized");
+        // Navigation functionality is now handled by navigation.js
+        console.log("Navigation handled by navigation.js module");
 
     } catch (error) {
         console.error("Error initializing landing page:", error);

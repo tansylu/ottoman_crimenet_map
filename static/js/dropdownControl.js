@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set the size attribute to control dropdown height
         criminalSelector.setAttribute('size', '1');
         
+        // Add custom styling to hide the default dropdown arrow
+        criminalSelector.style.appearance = 'none';
+        criminalSelector.style.webkitAppearance = 'none';
+        criminalSelector.style.mozAppearance = 'none';
+        
         // Add event listeners to control dropdown behavior
         criminalSelector.addEventListener('mousedown', function(e) {
             // When the dropdown is clicked, set size to show multiple options
