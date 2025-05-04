@@ -1,0 +1,401 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapping the Crime: An Analysis of a Crime Network during the Crimean War</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles/colors.css">
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/criminals_map.css">
+    <link rel="stylesheet" href="/static/styles/criminal_journeys_landing.css">
+</head>
+<body>
+    <!-- Header with navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <nav class="site-nav">
+                <ul>
+                    <li><a href="#about-the-project" class="nav-link">About The Project</a></li>
+                    <li><a href="#intro" class="nav-link">Crimean War</a></li>
+                    <li><a href="#criminal-network" class="nav-link">Criminal Network</a></li>
+                    <li><a href="#criminals-gallery" class="nav-link">Portfolio of Criminals</a></li>
+                    <li><a href="#legal-fight" class="nav-link">Ottoman-Italian Diplomacy</a></li>
+                    <li><a href="#about-us" class="nav-link">Project Team</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero section with background image -->
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1>Mapping Crime: An Analysis of a Crime Network during the Crimean War</h1>
+        </div>
+    </section>
+
+    <!-- About The Project Section -->
+    <section id="about-the-project" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>About The Project</h2>
+            </div>
+
+            <div class="section-subtitle-wrapper">
+                <h3>The Project</h3>
+            </div>
+            <p>This project explores the collaborative efforts between
+            the Ottoman Empire and the newly emerging Italian nation in combating a transnational criminal network that emerged
+            during the Crimean War (1853-56). Amid the political upheaval of the Crimean conflict and Italian Risorgimento, a diverse
+            group of wartime profiteers – soldiers, artisans, and career lawyers - took the opportunity to engage in large-scale forgery.
+            The project examines the ways in which Ottoman diplomatic networks and communication channels across Mediterranean
+            port cities formed a close collaboration against this crime. By applying network analysis and digital tools to historical data,
+            this project traces social interactions, identifies key actors, and illustrates patterns of trans-imperial criminal network.
+
+            <br><br>This project is conducted as part of Sabancı University PURE (Program for Undergraduate Research) program.</p>
+
+            <div class="section-subtitle-wrapper">
+                <h3>Sources and Methods</h3>
+            </div>
+            <p>This project draws on a diverse array of primary sources from Ottoman archives, which include
+                diplomatic correspondences, police reports, court proceedings, consular dispatches, and newspaper articles.
+
+                <br><br> The project employs historical network analysis as its core methodology. This method combines close reading of archival
+                documents with digital tools and computational analysis for mapping and analyzing relationships among people, locations
+                and state apparatus. ……. (buraya kullandığınız computational tool’ları yazabilir misiniz?) techniques/tools are used to
+                identify key actors, their roles and affiliations. These data are processed through network analysis software (buraya da
+                isimlerini yazabilir misiniz?) to visualize the spatial and relational dimensions of the crime network and the diplomatic
+                communication channels to track them.
+                </p>
+
+        </div>
+    </section>
+
+    <!-- Crimean War Section -->
+    <section id="intro" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>Crimean War</h2>
+            </div>
+
+            <div class="section-subtitle-wrapper">
+                <h3>Historical Context</h3>
+            </div>
+            <p>After the Napoleonic Wars (1803-1815), European powers were resolute in avoiding any future international conflict
+                similar to Napoleon Bonaparte’s military campaign. Symbolizing this new era of diplomacy, the Concert of Europe struggled
+                to withstand the waves of revolution that soon erupted. Therefore, the 1815 Congress of Vienna sought to establish a world order grounded in international law, with the aim of maintaining public order and political stability. The police networks established across Europe during the Restoration period were limited in their effect in curbing growing unrest and political agitation.
+                </p>
+                <div class="image-container">
+                    <img src="/static/images/1. Eugene Delacroix - La Liberte.jpg" alt="Historical image of the Crimean War context" class="section-image">
+                    <p class="image-caption">1. Eugéne Delacroix, La Liberté guidant le people (Liberty Leading the People), 1830 – Louvre Museum
+                    </p>
+                </div>
+
+                <p>The Crimean War (1853-56) was a major military conflict fought primarily on the Crimean Peninsula between Russia and an alliance of the Ottoman Empire, Britain, France, and the Kingdom of Sardinia-Piedmont. The war fueled by tensions over the rights of Catholic and Orthodox Christians in Jerusalem and broader imperialist competition, exposed tensions among the European powers.
+                </p>
+                <div class="image-container">
+                    <img src="/static/images/2. Victor Adam Guerre_d'Orient.jpeg" alt="Historical image of the Crimean War context" class="section-image">
+                    <p class="image-caption">2. Victor Adam, Guerre d’Orient (War in the East) - Bibliothèque Nationale de France, RESERVE QB-370 (139)-FT4
+                    </p>
+                </div>
+                <div class="image-container">
+                    <img src="/static/images/3. Paris Peace Conference.jpg" alt="Historical image of the Crimean War context" class="section-image">
+                    <p class="image-caption">3. Paris Peace Conference, 1856 – BOA FTG.F.269
+                    </p>
+                </div>
+
+                <p>The Crimean War ended in 1856 with the defeat of Russia. The following Treaty of Paris (1856) ushered in a new chapter in diplomacy with the hope to reshape the dynamics of European politics. It played a key role in legitimizing the postwar claims of the participating states. Austria lost its Balkan garrison. Russia’s control over the Black Sea was weakened due to neutralization and free navigation. On the victorious side, Britain reinforced its position in European politics despite heavy war losses. France maintained its political influence until it was defeated in the 1870 Franco-Prussian War. By 1871, Italy emerged as a unified nation state after the Risorgimento period.
+                </p>
+                <div class="image-row">
+                    <div class="image-container side-by-side">
+                        <img src="/static/images/Unification_of_Italy_1815-1870.jpeg" alt="Historical image of the Crimean War context" class="section-image">
+                        <p class="image-caption">William Shepherd, Historical Atlas, New York: Henry Holt and Company, 1911
+                        </p>
+                    </div>
+                    <div class="image-container side-by-side">
+                        <img src="/static/images/Italy.jpeg" alt="Historical image of the Crimean War context" class="section-image">
+                        <p class="image-caption">William Harvey, Geographical Fun, London: Hodder and Soughton, 1868.
+                        </p>
+                    </div>
+                </div>
+
+            <div class="section-subtitle-wrapper">
+                <h3>War Fronts</h3>
+            </div>
+            <p>Major events of the Crimean War:</p>
+
+            <h4>Timeline</h4>
+            <div class="timeline-container">
+                <div class="timeline-item">
+                    <div class="timeline-date">June 1853</div>
+                    <div class="timeline-content">Russia occupies Wallachia and Moldavia.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">June 1853</div>
+                    <div class="timeline-content">Britain and France advance through the Dardanelles toward the Bosphorus.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">October 1853</div>
+                    <div class="timeline-content">The Ottoman Empire declares war on Russia.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">November 1853</div>
+                    <div class="timeline-content">Battle of Sinop (Russian victory).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">March 1854</div>
+                    <div class="timeline-content">Britain and France declare war on Russia.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">June 1854</div>
+                    <div class="timeline-content">Siege of Silistra (Russia withdraws).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">September 1854</div>
+                    <div class="timeline-content">Battle of Alma (Russian defeat).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">October 1854</div>
+                    <div class="timeline-content">Battle of Balaclava (inconclusive).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">November 1854</div>
+                    <div class="timeline-content">Battle of Inkerman (Russian defeat).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Oct. 1854 - Sept. 1855</div>
+                    <div class="timeline-content">Siege of Sevastopol (Russian defeat).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">June - Nov. 1855</div>
+                    <div class="timeline-content">Siege of Kars (Ottoman victory).</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="/static/images/Crimean War.png" alt="Historical image of the Crimean War context" class="section-image">
+                <p class="image-caption">Encyclopedia Britannica
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Criminal Network Section -->
+    <section id="criminal-network" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>Criminal Network</h2>
+            </div>
+            <p>Visualizations of criminal networks and their movements during the Crimean War</p>
+
+            <!-- Network Map Subsection -->
+            <div class="section-subtitle-wrapper">
+                <h3>Network Map</h3>
+            </div>
+            <p>Visual network and relationship map of the forgers</p>
+            <div class="map-container">
+                <!-- Network visualization will go here -->
+            </div>
+
+            <!-- Mobility Map Subsection -->
+            <div class="section-subtitle-wrapper">
+                <h3>Mobility Map</h3>
+            </div>
+            <p>Interactive map showing the mobility of each forger separately</p>
+
+            <!-- Include the criminal journeys template -->
+            <div class="criminal-journeys-container">
+                {% include 'criminal_journeys.html' %}
+            </div>
+
+            <!-- Beyoglu Map Subsection -->
+            <div class="section-subtitle-wrapper">
+                <h3>Beyoglu Map</h3>
+            </div>
+            <p>Detailed historic map overlay of Beyoglu</p>
+            <div class="map-container">
+                <!-- Beyoglu map will go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio of Criminals Section -->
+    <section id="criminals-gallery" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>Portfolio of Criminals</h2>
+            </div>
+            <p>Comprehensive information about the criminals involved in the forgery network</p>
+
+            <!-- Criminal Information Table -->
+            <div class="section-subtitle-wrapper">
+                <h3>Criminal Records</h3>
+            </div>
+            <div class="criminals-table-container">
+                <table class="criminals-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Birth Date</th>
+                            <th>Birthplace</th>
+                            <th>Nationality</th>
+                            <th>Occupation</th>
+                            <th>Place of Arrest</th>
+                        </tr>
+                    </thead>
+                    <tbody id="criminals-table-body">
+                        <!-- Criminal data will be populated here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- AI-Generated Portraits -->
+            <div class="section-subtitle-wrapper">
+                <h3>Criminal Portraits</h3>
+            </div>
+            <p>AI-generated drawings based on physical descriptions (portrait parlé)</p>
+            <div class="gallery-container" id="criminal-portraits">
+                <!-- AI-generated portraits will be populated here via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Ottoman-Italian Diplomacy Section -->
+    <section id="legal-fight" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>Ottoman-Italian Diplomacy</h2>
+            </div>
+            <p>Communication network of state officers</p>
+            <div class="network-container">
+                <!-- Communication network visualization will go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Team Section -->
+    <section id="about-us" class="section">
+        <div class="section-container">
+            <div class="section-title-wrapper">
+                <h2>Project Team</h2>
+            </div>
+
+            <div class="section-subtitle-wrapper">
+                <h3>Project Supervisor</h3>
+            </div>
+            <div class="supervisor-container">
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="/static/images/Berna Kamay Ulusay.jpeg" alt="Berna Kamay Ulusay">
+                    </div>
+                    <div class="member-info">
+                        <h4 class="member-name">Berna Kamay Ulusay</h4>
+                        <p class="member-department">Foundations Development Directorate</p>
+                        <p class="member-institution">Sabancı University</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-subtitle-wrapper">
+                <h3>Project Team</h3>
+            </div>
+            <div class="team-container">
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="/static/images/placeholder-profile.jpg" alt="Hakan Mert Özcan">
+                    </div>
+                    <div class="member-info">
+                        <h4 class="member-name">Hakan Mert Özcan</h4>
+                        <p class="member-department">Faculty of Engineering and Natural Sciences</p>
+                        <p class="member-institution">Sabancı University</p>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="/static/images/placeholder-profile.jpg" alt="Furkan Emre Babadağ">
+                    </div>
+                    <div class="member-info">
+                        <h4 class="member-name">Furkan Emre Babadağ</h4>
+                        <p class="member-department">Faculty of Engineering and Natural Sciences</p>
+                        <p class="member-institution">Sabancı University</p>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="/static/images/placeholder-profile.jpg" alt="Zeynep Zilan Turunç">
+                    </div>
+                    <div class="member-info">
+                        <h4 class="member-name">Zeynep Zilan Turunç</h4>
+                        <p class="member-department">Faculty of Engineering and Natural Sciences</p>
+                        <p class="member-institution">Sabancı University</p>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="/static/images/placeholder-profile.jpg" alt="Tansylu Akhmetova">
+                    </div>
+                    <div class="member-info">
+                        <h4 class="member-name">Tansylu Akhmetova</h4>
+                        <p class="member-department">Faculty of Engineering and Natural Sciences</p>
+                        <p class="member-institution">Sabancı University</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <footer>
+        <p>Ottoman Crime Network Map &copy; 2023 | PURE '2025 at Sabanci University</p>
+    </footer>
+
+    <!-- Firebase configuration data -->
+    <script id="firebase-config" type="application/json">
+        {{ firebase_config | tojson }}
+    </script>
+
+    <!-- External libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.js"></script>
+    <script>
+        // Fallback if the plugin fails to load
+        if (!L.polylineDecorator) {
+            L.polylineDecorator = function(polyline) {
+                console.warn('Using polylineDecorator fallback');
+                return {
+                    addTo: function() { return this; }
+                };
+            };
+        }
+    </script>
+
+
+    <!-- Application modules -->
+    <script src="/static/js/navigation.js"></script>
+    <script src="/static/js/colorConfig.js"></script>
+    <script src="/static/js/markerUtils.js"></script>
+    <script src="/static/js/mapUtils.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/timeSlider.js"></script>
+    <script src="/static/js/markers.js"></script>
+    <script src="/static/js/borders.js"></script>
+    <script src="/static/js/criminalsMap.js"></script>
+    <script src="/static/js/mapFullscreen.js"></script>
+    <script src="/static/js/main_landing.js"></script>
+</body>
+</html>

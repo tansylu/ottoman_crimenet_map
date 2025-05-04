@@ -3,7 +3,7 @@
 /**
  * Initialize Ottoman borders functionality
  * @param {L.Map} map - Leaflet map instance
- * @param {string} toggleButtonId - ID of the toggle button
+ * @param {string} toggleButtonId - Optional ID of the toggle button
  */
 function initBorders(map, toggleButtonId) {
     // Load the borders GeoJSON data
@@ -20,20 +20,24 @@ function initBorders(map, toggleButtonId) {
                 }
             }).addTo(map);
 
-            // Toggle borders button
-            const toggleButton = document.getElementById(toggleButtonId);
-            let bordersVisible = true;
+            // Toggle borders button (if provided)
+            if (toggleButtonId) {
+                const toggleButton = document.getElementById(toggleButtonId);
+                if (toggleButton) {
+                    let bordersVisible = true;
 
-            toggleButton.addEventListener('click', function() {
-                if (bordersVisible) {
-                    map.removeLayer(borders);
-                    toggleButton.textContent = 'Show Ottoman Borders';
-                } else {
-                    borders.addTo(map);
-                    toggleButton.textContent = 'Hide Ottoman Borders';
+                    toggleButton.addEventListener('click', function() {
+                        if (bordersVisible) {
+                            map.removeLayer(borders);
+                            toggleButton.textContent = 'Show Ottoman Borders';
+                        } else {
+                            borders.addTo(map);
+                            toggleButton.textContent = 'Hide Ottoman Borders';
+                        }
+                        bordersVisible = !bordersVisible;
+                    });
                 }
-                bordersVisible = !bordersVisible;
-            });
+            }
         });
 }
 

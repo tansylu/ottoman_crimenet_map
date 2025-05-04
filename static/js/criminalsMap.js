@@ -6,6 +6,61 @@ let criminalJourneyLayer = null;
 let allCriminals = [];
 let criminalEvents = [];
 
+// Ensure formatDate function is available
+if (typeof formatDate !== 'function') {
+    // Define formatDate if it's not already defined (for standalone page)
+    function formatDate(dateObj) {
+        if (!dateObj) return 'Unknown Date';
+
+        const year = dateObj.year;
+        const month = dateObj.month;
+        const day = dateObj.day;
+
+        if (!year) return 'Unknown Date';
+
+        let dateStr = year.toString();
+
+        if (month) {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            dateStr = monthNames[month - 1] + ' ' + dateStr;
+
+            if (day) {
+                dateStr = day + ' ' + dateStr;
+            }
+        }
+
+        return dateStr;
+    }
+}
+
+// Ensure extractLocationFromDescription function is available
+if (typeof extractLocationFromDescription !== 'function') {
+    // Define extractLocationFromDescription if it's not already defined (for standalone page)
+    function extractLocationFromDescription(description, locationName1, locationName2) {
+        // Use provided location name if available
+        if (locationName1) return locationName1;
+        if (locationName2) return locationName2;
+
+        // Try to extract from description
+        if (description) {
+            // Look for "in [Location]" pattern
+            const inMatch = description.match(/\bin\s+([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+            if (inMatch && inMatch[1]) {
+                return inMatch[1].trim();
+            }
+
+            // Look for location at the beginning of the description
+            const startMatch = description.match(/^([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+            if (startMatch && startMatch[1]) {
+                return startMatch[1].trim();
+            }
+        }
+
+        return 'Unknown Location';
+    }
+}
+
 /**
  * Fetch criminals for the criminals map
  * @param {Object} db - Firestore database instance
@@ -205,18 +260,20 @@ function showCriminalJourney(criminalId, db, map) {
                     title: event.description || 'Event'
                 });
 
-                // Add popup with event information
-                let popupContent = `
-                    <div class="event-popup">
-                        <div class="event-number">${index + 1}</div>
-                        <div class="event-type event-type-${event.type}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</div>
-                        <div class="event-date">${formatDate(event.date)}</div>
-                        <div class="event-location">${event.locationName}</div>
-                        ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent);
+                // Instead of popup, make marker click update the timeline info
+                marker.on('click', function() {
+                    // Highlight this event in the timeline
+                    const timelineEvents = document.querySelectorAll('.timeline-event');
+                    timelineEvents.forEach((el, i) => {
+                        if (i === index) {
+                            el.classList.add('highlighted');
+                            // Scroll to this event in the timeline
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            el.classList.remove('highlighted');
+                        }
+                    });
+                });
 
                 // Add marker to journey cluster group
                 journeyClusterGroup.addLayer(marker);
@@ -240,10 +297,13 @@ function showCriminalJourney(criminalId, db, map) {
             if (eventMarkers.length > 0) {
                 const group = L.featureGroup(eventMarkers);
                 map.fitBounds(group.getBounds().pad(0.1));
+
+                // Store markers for reference in a global variable
+                window.eventMarkersArray = eventMarkers;
             }
 
             // Update the timeline info panel
-            updateTimelineInfo(events, criminalId);
+            updateTimelineInfo(events, criminalId, eventMarkers);
 
             // Also show the criminal details
             showCriminalDetails(criminalId);
@@ -258,14 +318,20 @@ function showCriminalJourney(criminalId, db, map) {
  * Update the timeline info panel with events
  * @param {Array} events - Array of event objects
  * @param {string} criminalId - ID of the criminal
+ * @param {Array} markers - Array of event markers (optional)
  */
-function updateTimelineInfo(events, criminalId) {
+function updateTimelineInfo(events, criminalId, markers) {
     const timelineEvents = document.getElementById('timeline-events');
     timelineEvents.innerHTML = '';
 
     if (events.length === 0) {
         timelineEvents.innerHTML = '<p>No events found for this criminal.</p>';
         return;
+    }
+
+    // Store markers for reference if provided
+    if (markers && Array.isArray(markers)) {
+        window.eventMarkersArray = markers;
     }
 
     // Get the criminal name if available
@@ -286,10 +352,13 @@ function updateTimelineInfo(events, criminalId) {
         });
     }
 
+    // Markers are now stored in window.eventMarkersArray for reference by timeline events
+
     // Add events to timeline in chronological order (already sorted)
     events.forEach((event, index) => {
         const eventItem = document.createElement('div');
         eventItem.className = 'timeline-event';
+        eventItem.dataset.index = index;
 
         // Format date
         const dateStr = formatDate(event.date);
@@ -305,6 +374,39 @@ function updateTimelineInfo(events, criminalId) {
             <span class="${eventTypeClass}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
             ${event.description && event.description.trim() !== '' ? `<div class="event-description">${event.description}</div>` : ''}
         `;
+
+        // Make timeline event clickable to highlight the corresponding marker
+        eventItem.addEventListener('click', function() {
+            // Highlight this event in the timeline
+            document.querySelectorAll('.timeline-event').forEach(el => {
+                el.classList.remove('highlighted');
+            });
+            this.classList.add('highlighted');
+
+            // If we have markers stored, highlight the corresponding marker
+            if (window.eventMarkersArray && window.eventMarkersArray[index]) {
+                const marker = window.eventMarkersArray[index];
+                // Center the map on this marker
+                if (window.criminalsMapInstance) {
+                    window.criminalsMapInstance.setView(marker.getLatLng(), window.criminalsMapInstance.getZoom());
+                    // Flash the marker
+                    const icon = marker.getIcon();
+                    const originalIconUrl = icon.options.iconUrl;
+
+                    // Create a highlighted version of the icon if possible
+                    if (window.markerUtils_createHighlightedMarkerIcon) {
+                        const highlightedIcon = window.markerUtils_createHighlightedMarkerIcon(index + 1, event.type);
+                        marker.setIcon(highlightedIcon);
+
+                        // Reset after a delay
+                        setTimeout(() => {
+                            const normalIcon = window.markerUtils_createNumberedMarkerIcon(index + 1, event.type);
+                            marker.setIcon(normalIcon);
+                        }, 2000);
+                    }
+                }
+            }
+        });
 
         timelineEvents.appendChild(eventItem);
     });
@@ -325,71 +427,90 @@ function initCriminalModal() {
 function showCriminalDetails(criminalId) {
     console.log("Showing details for criminal:", criminalId);
 
-    // Get the criminal info panel element
+    // Get the criminal description element (new location)
+    const criminalDescription = document.getElementById('criminal-description');
+
+    // Fallback to the old info panel if the new element doesn't exist
     const criminalInfoPanel = document.getElementById('criminal-info');
 
-    if (!criminalInfoPanel) {
-        console.error("Criminal info panel element not found");
+    // Determine which element to use (prefer the new description element)
+    const targetElement = criminalDescription || criminalInfoPanel;
+
+    // We're always in the standalone page context for criminal_journeys.html
+    // No need to check for landing page context anymore
+    const isLandingPage = false;
+
+    if (!targetElement) {
+        console.error("Criminal description element not found");
         return;
     }
 
     // Make sure the panel is visible
-    criminalInfoPanel.style.display = 'block';
+    targetElement.style.display = 'block';
+
+    // Get the Firestore instance - either from the global firebase object or from the db parameter
+    const firestore = (firebase && firebase.firestore) ? firebase.firestore() :
+                     (window.db ? window.db : null);
+
+    if (!firestore) {
+        console.error("Firestore not available");
+        targetElement.innerHTML = '<p>Error: Firebase not initialized</p>';
+        return;
+    }
 
     // Fetch criminal details from Firestore
-    if (firebase && firebase.firestore) {
-        firebase.firestore().collection('criminals').doc(criminalId).get().then((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
+    firestore.collection('criminals').doc(criminalId).get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
 
-                // Build the HTML for the criminal info
-                let infoHTML = `<h3>${data.name || 'Unknown Criminal'}</h3>`;
-                infoHTML += '<div class="criminal-details">';
+            // Build the HTML for the criminal info
+            let infoHTML = `<h3>${data.name || 'Unknown Criminal'}</h3>`;
+            infoHTML += '<div class="criminal-details">';
 
-                // Create a table-like structure for better formatting
-                const details = [];
+            // Create a table-like structure for better formatting
+            const details = [];
 
-                if (data.alias) {
-                    details.push({label: 'Alias', value: data.alias});
-                }
-
-                if (data.birthdate) {
-                    details.push({label: 'Birth Date', value: data.birthdate});
-                }
-
-                if (data.birthplace) {
-                    details.push({label: 'Birth Place', value: data.birthplace});
-                }
-
-                if (data.prof) {
-                    details.push({label: 'Profession', value: data.prof});
-                }
-
-                if (data.nation) {
-                    details.push({label: 'Nationality', value: data.nation});
-                }
-
-                // Add all details with consistent formatting
-                details.forEach(detail => {
-                    infoHTML += `<p><strong>${detail.label}:</strong> ${detail.value}</p>`;
-                });
-
-                infoHTML += '</div>';
-
-                // Set the panel content
-                criminalInfoPanel.innerHTML = infoHTML;
-            } else {
-                console.log("No criminal found with ID:", criminalId);
-                criminalInfoPanel.innerHTML = '<p>No details found for this criminal.</p>';
+            if (data.alias) {
+                details.push({label: 'Alias', value: data.alias});
             }
-        }).catch(error => {
-            console.error("Error getting criminal:", error);
-            criminalInfoPanel.innerHTML = '<p>Error retrieving criminal details. Please try again.</p>';
-        });
-    } else {
-        console.error("Firebase not initialized");
-        criminalInfoPanel.innerHTML = '<p>Error: Firebase not initialized</p>';
-    }
+
+            if (data.birthdate) {
+                details.push({label: 'Birth Date', value: data.birthdate});
+            }
+
+            if (data.birthplace) {
+                details.push({label: 'Birth Place', value: data.birthplace});
+            }
+
+            if (data.prof) {
+                details.push({label: 'Profession', value: data.prof});
+            }
+
+            if (data.nation) {
+                details.push({label: 'Nationality', value: data.nation});
+            }
+
+            if (data.placeofprof) {
+                details.push({label: 'Place of Profession', value: data.placeofprof});
+            }
+
+            // Add all details with consistent formatting
+            details.forEach(detail => {
+                infoHTML += `<div class="criminal-detail"><strong>${detail.label}:</strong> ${detail.value}</div>`;
+            });
+
+            infoHTML += '</div>';
+
+            // Set the panel content
+            targetElement.innerHTML = infoHTML;
+        } else {
+            console.log("No criminal found with ID:", criminalId);
+            targetElement.innerHTML = '<p>No details found for this criminal.</p>';
+        }
+    }).catch(error => {
+        console.error("Error getting criminal:", error);
+        targetElement.innerHTML = '<p>Error retrieving criminal details. Please try again.</p>';
+    });
 }
 
 // These functions are already defined above, so we're removing the duplicates

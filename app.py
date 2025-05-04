@@ -22,7 +22,7 @@ def get_firebase_config():
 def one_page():
     """Render the new one-page application"""
     firebase_config = get_firebase_config()
-    return render_template('index.html', firebase_config=firebase_config)
+    return render_template('index_landing.html', firebase_config=firebase_config)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5004)

@@ -1,18 +1,10 @@
 /* Ottoman Crime Network Map - One-pager specific styles */
 
 /* Basic layout */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    color: var(--text);
-    background-color: var(--background);
-    overflow-x: hidden;
-}
 
 header {
-    background-color: var(--primary-dark);
-    color: white;
+    background-color: var(--primary);
+    color: var(--neutral-light);
     padding: 2rem;
     text-align: center;
 }
@@ -39,8 +31,8 @@ section {
 }
 
 footer {
-    background-color: var(--primary-dark);
-    color: white;
+    background-color: var(--primary);
+    color: var(--neutral-light);
     padding: 1rem;
     text-align: center;
     font-size: 0.9rem;
@@ -51,7 +43,7 @@ footer {
     position: relative;
     height: 80vh;
     margin: 2rem 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -64,7 +56,7 @@ footer {
 .map-tab {
     padding: 0.75rem 1.5rem;
     background-color: var(--neutral-light);
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent);
     border-bottom: none;
     border-radius: 4px 4px 0 0;
     cursor: pointer;
@@ -74,7 +66,7 @@ footer {
 
 .map-tab.active {
     background-color: var(--primary);
-    color: white;
+    color: var(--neutral-light);
 }
 
 .map-view {
@@ -102,7 +94,7 @@ footer {
     top: 10px;
     left: 10px;
     z-index: 1000;
-    background: white;
+    background: var(--neutral-light);
     padding: 10px;
     border-radius: 4px;
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
@@ -150,7 +142,7 @@ footer {
 /* Info panel styles */
 .info-panel {
     position: absolute;
-    background-color: white;
+    background-color: var(--neutral-light);
     border-radius: 4px;
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
     padding: 10px;
@@ -163,7 +155,8 @@ footer {
 #timeline-info {
     top: 10px;
     right: 10px;
-    width: 300px;
+    width: 500px; /* Increased from 300px */
+    max-width: 60%; /* Added max-width */
 }
 
 /* Criminal info panel */
@@ -303,13 +296,24 @@ footer {
 
 #criminal-info h3 {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-family: 'Playfair Display', serif;
     color: var(--primary);
-    border-bottom: 1px solid var(--accent);
-    padding-bottom: 5px;
+    padding-bottom: 10px;
     font-size: 18px; /* Slightly larger font for the name */
     word-wrap: break-word; /* Ensure long names wrap */
+    position: relative;
+}
+
+#criminal-info h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), var(--primary));
+    border-radius: 2px;
 }
 
 /* Ensure the info panel has proper padding and sizing */
@@ -327,7 +331,8 @@ footer {
     }
 
     #timeline-info {
-        width: 250px;
+        width: 400px; /* Increased from 250px */
+        max-width: 70%; /* Added max-width */
     }
 
     .criminal-info-panel {
@@ -358,7 +363,8 @@ footer {
     }
 
     #timeline-info {
-        width: 200px;
+        width: 300px; /* Increased from 200px */
+        max-width: 80%; /* Added max-width */
         max-height: 250px;
     }
 
