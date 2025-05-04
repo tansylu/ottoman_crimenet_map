@@ -7,15 +7,40 @@
  * @returns {string} - Hex color code
  */
 function getColorForEventType(eventType) {
-    // Determine color based on event type
-    let color = colorConfig.mixedColor; // Default mixed color
+    // Ensure colorConfig is available
+    if (typeof window.colorConfig === 'undefined') {
+        console.error("colorConfig is not defined");
+        // Fallback colors if colorConfig is not available
+        const fallbackColors = {
+            forgery: '#9E4B4B',  // Red for forgery
+            escape: '#4B6455',   // Green for escape
+            arrest: '#2C2C2C',   // Dark for arrest
+            mixed: '#6A5D4D'     // Brown for mixed types
+        };
+
+        // Determine color based on event type using fallback colors
+        let color = fallbackColors.mixed; // Default mixed color
+
+        if (eventType === 'forgery') {
+            color = fallbackColors.forgery;
+        } else if (eventType === 'escape') {
+            color = fallbackColors.escape;
+        } else if (eventType === 'arrest') {
+            color = fallbackColors.arrest;
+        }
+
+        return color;
+    }
+
+    // Use colorConfig if available
+    let color = window.colorConfig.mixedColor; // Default mixed color
 
     if (eventType === 'forgery') {
-        color = colorConfig.forgeryColor; // Red for forgery
+        color = window.colorConfig.forgeryColor; // Red for forgery
     } else if (eventType === 'escape') {
-        color = colorConfig.escapeColor; // Green for escape
+        color = window.colorConfig.escapeColor; // Green for escape
     } else if (eventType === 'arrest') {
-        color = colorConfig.arrestColor; // Dark for arrest
+        color = window.colorConfig.arrestColor; // Dark for arrest
     }
 
     return color;
@@ -94,6 +119,23 @@ function createNumberedMarkerIcon(number, eventType) {
         html: `<div class="marker-number" style="background-color: ${markerColor};">${number}</div>`,
         iconSize: [36, 36],
         iconAnchor: [18, 18]
+    });
+}
+
+/**
+ * Create a highlighted version of the numbered marker icon
+ * @param {number} number - The number to display in the marker
+ * @param {string} eventType - The type of event
+ * @returns {L.divIcon} - Leaflet div icon
+ */
+function createHighlightedMarkerIcon(number, eventType) {
+    const markerColor = getColorForEventType(eventType);
+
+    return L.divIcon({
+        className: 'custom-numbered-marker',
+        html: `<div class="marker-number" style="background-color: ${markerColor}; transform: scale(1.3); box-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.6); border: 2px solid white;">${number}</div>`,
+        iconSize: [46, 46], // Slightly larger
+        iconAnchor: [23, 23]
     });
 }
 
@@ -209,6 +251,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getColorForEventType,
         createLocationMarker,
         createNumberedMarkerIcon,
+        createHighlightedMarkerIcon,
         createClusterIcon,
         createArrow
     };
@@ -219,6 +262,7 @@ if (typeof module !== 'undefined' && module.exports) {
 window.markerUtils_getColorForEventType = getColorForEventType;
 window.markerUtils_createLocationMarker = createLocationMarker;
 window.markerUtils_createNumberedMarkerIcon = createNumberedMarkerIcon;
+window.markerUtils_createHighlightedMarkerIcon = createHighlightedMarkerIcon;
 window.markerUtils_createClusterIcon = createClusterIcon;
 window.markerUtils_createArrow = createArrow;
 
