@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="/static/styles/main.css">
     <link rel="stylesheet" href="/static/styles/criminals_map.css">
     <link rel="stylesheet" href="/static/styles/criminal_journeys_landing.css">
+    <link rel="stylesheet" href="/static/styles/section_spacing.css">
 </head>
 <body>
     <!-- Header with navigation -->
@@ -201,9 +202,11 @@
                 <h3>Network Map</h3>
             </div>
             <p>Visual network and relationship map of the forgers</p>
-            <div class="map-container">
-                <!-- Network visualization will go here -->
+            <div class="map-container" style="width: 90%; max-width: 1200px; margin: 0 auto; margin-bottom: 30px;">
+                <iframe src="/network-relation-map" style="width: 100%; height: 500px; border: none; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></iframe>
             </div>
+
+            <div style="clear: both; height: 20px;"></div>
 
             <!-- Mobility Map Subsection -->
             <div class="section-subtitle-wrapper">

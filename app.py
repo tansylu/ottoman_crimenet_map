@@ -24,5 +24,11 @@ def one_page():
     firebase_config = get_firebase_config()
     return render_template('index_landing.html', firebase_config=firebase_config)
 
+@app.route('/network-relation-map')
+def network_relation_map():
+    """Render the network relation map"""
+    firebase_config = get_firebase_config()
+    return render_template('network_relation_map.html', firebase_config=firebase_config)
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5004)
+    app.run(debug=True, port=5005)

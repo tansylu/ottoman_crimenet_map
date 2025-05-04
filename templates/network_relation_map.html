@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criminal Network Relation Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        #relation-map {
+            width: 100%;
+            height: 100%;
+            background-color: #f9f6f0; /* Light beige background for an older look */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Add a subtle brown overlay to give an aged look */
+        #relation-map::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(139, 69, 19, 0.1); /* Subtle brown color */
+            pointer-events: none; /* Allow clicks to pass through */
+            z-index: 1000; /* Above map elements but below controls */
+        }
+
+        .network-filter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1001; /* Above the brown overlay */
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .network-filter button {
+            margin: 2px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .network-filter button.active {
+            color: white;
+            font-weight: bold;
+        }
+
+        .network-filter button:hover {
+            opacity: 0.8;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            z-index: 1001; /* Above the brown overlay */
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #f9f6f0;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #modal-title {
+            color: #8B4513;
+            border-bottom: 2px solid #D2B48C;
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        #modal-details p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        #modal-details strong {
+            color: #8B4513;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .relation-details {
+            margin-top: 15px;
+        }
+
+        .relation-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .relation-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Button colors for networks */
+        .btn-network-all {
+            background-color: #999 !important;
+            color: white;
+        }
+
+        .btn-network-1 {
+            background-color: #e74c3c !important;
+            color: white;
+        }
+
+        .btn-network-2 {
+            background-color: #3498db !important;
+            color: white;
+        }
+
+        .btn-network-3 {
+            background-color: #2ecc71 !important;
+            color: white;
+        }
+
+        .btn-network-4 {
+            background-color: #e67e22 !important;
+            color: white;
+        }
+
+        .btn-network-5 {
+            background-color: #9b59b6 !important;
+            color: white;
+        }
+
+        .btn-network-6 {
+            background-color: #8B4513 !important;
+            color: white;
+        }
+
+        /* Tooltip styling */
+        .criminal-tooltip {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .criminal-tooltip::before {
+            border-top-color: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="relation-map"></div>
+
+    <div class="network-filter">
+        <button class="filter-btn active btn-network-all" data-network="all">All Networks</button>
+        <button class="filter-btn btn-network-1" data-network="network_1">Network 1</button>
+        <button class="filter-btn btn-network-2" data-network="network_2">Network 2</button>
+        <button class="filter-btn btn-network-3" data-network="network_3">Network 3</button>
+        <button class="filter-btn btn-network-4" data-network="network_4">Network 4</button>
+        <button class="filter-btn btn-network-5" data-network="network_5">Network 5</button>
+        <button class="filter-btn btn-network-6" data-network="network_6">Network 6</button>
+    </div>
+
+    <div class="legend">
+        <h4 style="margin-top: 0; margin-bottom: 8px;">Criminal Networks</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #e74c3c;"></div>
+            <span>Network 1</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #3498db;"></div>
+            <span>Network 2</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #2ecc71;"></div>
+            <span>Network 3</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #e67e22;"></div>
+            <span>Network 4</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #9b59b6;"></div>
+            <span>Network 5</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #8B4513;"></div>
+            <span>Network 6</span>
+        </div>
+    </div>
+
+    <div id="criminal-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">Criminal Details</h3>
+            <div id="modal-details"></div>
+            <!-- Relations section is hidden by default -->
+            <h4 style="display: none;">Relations</h4>
+            <div id="modal-relations" class="relation-details" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase configuration data -->
+    <script id="firebase-config" type="application/json">
+        {{ firebase_config | tojson }}
+    </script>
+
+    <script src="/static/js/network_relation_map.js"></script>
+</body>
+</html>
