@@ -87,11 +87,11 @@
     max-width: none; /* Ensure no max-width restriction */
     font-weight: 500; /* Slightly bolder text */
     cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A2A40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 16px;
+    
     padding-right: 40px; /* Make room for the custom arrow */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 /* Remove default arrow in IE */
@@ -183,7 +183,9 @@ select#diplomat-selector {
     padding: 10px 0;
     font-size: 16px;
 }
-
+#diplomat-selector:-ms-expand {
+    display: none;
+}
 /* Communications info panel */
 #communications-info {
     position: absolute;
