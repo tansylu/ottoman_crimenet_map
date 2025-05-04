@@ -127,25 +127,7 @@
     pointer-events: none;
 }
 
-/* Numbered marker styles */
-.custom-numbered-marker {
-    background: none;
-    border: none;
-}
-
-.marker-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-    border: 2px solid white;
-}
+/* Numbered marker styles are now defined in main.css */
 
 /* Responsive styles */
 @media screen and (max-width: 768px) {

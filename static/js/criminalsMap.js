@@ -1,100 +1,27 @@
+// Ottoman Crime Network Map - Criminals Map Module
+
 // Variables for the criminals map
 let selectedCriminalId = null;
 let criminalJourneyLayer = null;
 let allCriminals = [];
 let criminalEvents = [];
 
-// Define updateMarkers function for this view
-function updateMarkers() {
-    // This is a placeholder function to prevent errors
-    // The criminals map doesn't use the time-based marker filtering
-    console.log("updateMarkers called in criminals map view");
+/**
+ * Fetch criminals for the criminals map
+ * @param {Object} db - Firestore database instance
+ * @param {L.Map} map - Leaflet map instance
+ */
+function fetchCriminals(db, map) {
+    console.log("Fetching criminals for criminals map");
 
-    // If we have a selected criminal, make sure their journey stays visible
-    if (selectedCriminalId && criminalJourneyLayer) {
-        console.log("Ensuring criminal journey stays visible");
-        // No need to do anything as we're keeping the journey visible permanently
-    }
-}
+    // Get the criminal selector dropdown
+    const criminalSelector = document.getElementById('criminal-selector');
 
-// Override the updateMarkers function from map.js for this view
-// We need to do this before the DOM is loaded to ensure our version is used
-window.updateMarkers = function() {
-    console.log("Using criminals map version of updateMarkers");
-    // Do nothing - we want to keep the criminal journey visible
-    // and not filter by year
-};
-
-// Initialize the criminals map view
-document.addEventListener('DOMContentLoaded', function() {
-    // Get Firebase config from the server
-    const firebaseConfig = JSON.parse(document.getElementById('firebase-config').textContent);
-
-    // Initialize Firebase
-    initFirebase(firebaseConfig);
-
-    // Initialize map
-    initMap();
-
-    // Initialize criminal modal
-    initCriminalModal();
-
-    // Initialize Ottoman borders
-    initBorders();
-
-    // Fetch markers and criminals
-    fetchMarkers().then(() => {
-        // After markers are loaded, fetch criminals
-        fetchCriminals();
-    }).catch(error => {
-        console.error("Error fetching markers:", error);
-    });
-
-    // Initialize the criminal selector
-    initCriminalSelector();
-
-    // Handle window resize for responsive behavior
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        // Debounce resize event to prevent excessive reloading
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-            // Refresh the map to adjust to new size
-            map.invalidateSize();
-        }, 250);
-    });
-
-    // Override reset view button functionality for this view
-    document.getElementById('reset-view').addEventListener('click', function() {
-        // Reset the map view
-        map.setView(initialView.center, initialView.zoom);
-
-        // If a criminal is selected, fit the map to show their journey
-        if (selectedCriminalId && criminalJourneyLayer) {
-            // Find all markers in the journey layer
-            const markers = [];
-            criminalJourneyLayer.eachLayer(layer => {
-                if (layer instanceof L.Marker) {
-                    markers.push(layer);
-                }
-            });
-
-            // Fit the map to show all markers
-            if (markers.length > 0) {
-                const group = L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.1));
-            }
-        }
-    });
-});
-
-// Fetch all criminals from Firestore
-function fetchCriminals() {
-    console.log("Fetching criminals from Firestore...");
+    // Fetch all criminals from Firestore
     db.collection('criminals').get().then((querySnapshot) => {
         console.log(`Found ${querySnapshot.size} criminals in Firestore`);
 
-        allCriminals = [];
+        const allCriminals = [];
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -113,405 +40,268 @@ function fetchCriminals() {
         allCriminals.sort((a, b) => a.name.localeCompare(b.name));
 
         // Populate the criminal selector dropdown
-        populateCriminalSelector();
-    }).catch(error => {
-        console.error("Error fetching criminals:", error);
-    });
-}
-
-// Initialize the criminal selector dropdown
-function initCriminalSelector() {
-    const selector = document.getElementById('criminal-selector');
-
-    // Add event listener for selection change
-    selector.addEventListener('change', function() {
-        const criminalId = this.value;
-        if (criminalId) {
-            selectedCriminalId = criminalId;
-            displayCriminalJourney(criminalId);
-        } else {
-            // Clear the map if no criminal is selected
-            clearCriminalJourney();
-        }
-    });
-}
-
-// Populate the criminal selector dropdown with options
-function populateCriminalSelector() {
-    const selector = document.getElementById('criminal-selector');
-
-    // Clear existing options except the first one
-    while (selector.options.length > 1) {
-        selector.remove(1);
-    }
-
-    // Add options for each criminal
-    allCriminals.forEach(criminal => {
-        const option = document.createElement('option');
-        option.value = criminal.id;
-        option.textContent = criminal.name;
-        selector.appendChild(option);
-    });
-}
-
-// Display the journey of a selected criminal
-function displayCriminalJourney(criminalId) {
-    // Clear any existing journey
-    clearCriminalJourney();
-
-    // Clear the marker cluster group to avoid showing other markers
-    markerClusterGroup.clearLayers();
-
-    // Find all events related to this criminal
-    criminalEvents = allMarkers
-        .filter(marker => marker.documentData.criminalId === criminalId)
-        .map(marker => marker.documentData)
-        .sort((a, b) => {
-            if (a.date.year !== b.date.year) return a.date.year - b.date.year;
-            if (a.date.month && b.date.month && a.date.month !== b.date.month) return a.date.month - b.date.month;
-            if (a.date.day && b.date.day) return a.date.day - b.date.day;
-            return 0;
+        allCriminals.forEach(criminal => {
+            const option = document.createElement('option');
+            option.value = criminal.id;
+            option.textContent = criminal.name;
+            criminalSelector.appendChild(option);
         });
 
-    if (criminalEvents.length === 0) {
-        alert("No events found for this criminal.");
-        return;
+        // Add event listener to the criminal selector
+        criminalSelector.addEventListener('change', function() {
+            const criminalId = this.value;
+            if (criminalId) {
+                showCriminalJourney(criminalId, db, map);
+            } else {
+                // Clear the map if no criminal is selected
+                if (window.criminalJourneyLayer) {
+                    map.removeLayer(window.criminalJourneyLayer);
+                    window.criminalJourneyLayer = null;
+                }
+            }
+        });
+    }).catch(error => {
+        console.error("Error fetching criminals:", error);
+        alert("Error loading criminal data. Please try again later.");
+    });
+}
+
+/**
+ * Show a criminal's journey on the map
+ * @param {string} criminalId - ID of the criminal
+ * @param {Object} db - Firestore database instance
+ * @param {L.Map} map - Leaflet map instance
+ */
+function showCriminalJourney(criminalId, db, map) {
+    console.log("Showing journey for criminal:", criminalId);
+
+    // Clear previous journey if any
+    if (window.criminalJourneyLayer) {
+        map.removeLayer(window.criminalJourneyLayer);
     }
 
-    // Create a layer group for the journey
-    criminalJourneyLayer = L.layerGroup().addTo(map);
+    // Create a new layer group for the journey
+    window.criminalJourneyLayer = L.layerGroup().addTo(map);
 
     // Create a cluster group specifically for the criminal journey
     const journeyClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: 20, // Even smaller radius for criminal journey to show more detail
+        maxClusterRadius: 20, // Smaller radius for criminal journey to show more detail
         spiderfyOnMaxZoom: true,
-        zoomToBoundsOnClick: false, // We'll handle zoom behavior ourselves
-        disableClusteringAtZoom: 14, // Disable clustering at lower zoom levels
-        spiderfyDistanceMultiplier: 3, // Spread markers much further when spiderfying
-        spiderfyOnMaxZoom: true, // Always spiderfy at max zoom
-        animate: false, // Disable animation for more immediate response
+        zoomToBoundsOnClick: false,
+        disableClusteringAtZoom: 14,
+        spiderfyDistanceMultiplier: 3,
+        animate: false,
         iconCreateFunction: function(cluster) {
             // Count markers in the cluster
             const count = cluster.getChildCount();
 
-            // Get marker types in this cluster
-            const markers = cluster.getAllChildMarkers();
-            let dominantType = '';
+            // Determine size based on count
+            let size = 'small';
+            if (count > 3) size = 'medium';
+            if (count > 6) size = 'large';
 
-            // Find the dominant event type
-            if (markers.length > 0) {
-                const types = {};
-                markers.forEach(marker => {
-                    if (marker.eventType) {
-                        types[marker.eventType] = (types[marker.eventType] || 0) + 1;
-                    }
-                });
-
-                let maxCount = 0;
-                for (const type in types) {
-                    if (types[type] > maxCount) {
-                        maxCount = types[type];
-                        dominantType = type;
-                    }
-                }
-            }
-
-            // Determine color based on dominant type
-            let markerColor;
-            if (dominantType === 'forgery') {
-                markerColor = colorConfig.forgeryColor;
-            } else if (dominantType === 'escape') {
-                markerColor = colorConfig.escapeColor;
-            } else if (dominantType === 'arrest') {
-                markerColor = colorConfig.arrestColor;
-            } else {
-                markerColor = colorConfig.mixedColor; // Brown for mixed types
-            }
-
-            // Create custom cluster icon with count and numbers of contained events
+            // Create custom cluster icon with count
             return L.divIcon({
-                html: `<div class="marker-number" style="background-color: ${markerColor}; width: 36px; height: 36px;">${count}</div>`,
-                className: 'custom-numbered-marker',
-                iconSize: [36, 36],
-                iconAnchor: [18, 18]
+                html: `<div class="cluster-icon cluster-${size} cluster-mixed">${count}</div>`,
+                className: 'custom-cluster-icon',
+                iconSize: L.point(50, 50)
             });
         }
     });
 
     // Add the journey cluster group to the journey layer
-    criminalJourneyLayer.addLayer(journeyClusterGroup);
+    window.criminalJourneyLayer.addLayer(journeyClusterGroup);
 
-    // Add custom event handler for journey cluster clicks
-    journeyClusterGroup.on('clusterclick', function(event) {
-        // Get the cluster that was clicked
-        const cluster = event.layer;
-        const markers = cluster.getAllChildMarkers();
-        const clusterBounds = cluster.getBounds();
+    // Fetch events for this criminal without requiring composite index
+    // Try both field names (criminal_id and criminalId) to ensure compatibility
+    db.collection('events')
+        .where('criminalId', '==', criminalId)
+        .get()
+        .then((querySnapshot) => {
+            console.log(`Found ${querySnapshot.size} events for criminal ${criminalId}`);
 
-        console.log(`Journey cluster clicked with ${markers.length} events`);
+            const events = [];
+            const eventMarkers = [];
+            const journeyPoints = [];
 
-        // For all clusters, we'll handle the zoom ourselves to ensure markers are shown
-        const zoom = map.getBoundsZoom(clusterBounds);
+            // Process all events
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
 
-        // Calculate appropriate zoom level based on cluster size - using more conservative zoom
-        let targetZoom;
-        if (markers.length <= 3) {
-            // For very small clusters, zoom in moderately
-            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
-        } else if (markers.length <= 10) {
-            // For medium clusters, zoom in slightly
-            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
-        } else {
-            // For large clusters, zoom in minimally
-            targetZoom = Math.min(zoom + 1, map.getMaxZoom());
-        }
+                // Check for different coordinate formats
+                let hasValidCoordinates = false;
+                let coordinates = null;
 
-        // If we're already at or beyond the target zoom, force spiderfy
-        if (map.getZoom() >= targetZoom) {
-            // Force spiderfy immediately
-            cluster.spiderfy();
-            return true; // Allow default behavior
-        }
-
-        // For criminal journey, we prefer to spiderfy directly for better visualization
-        // Just spiderfy all clusters without zooming
-        cluster.spiderfy();
-        return true; // Allow default behavior
-    });
-
-    // Add markers for each event
-    const eventMarkers = [];
-    criminalEvents.forEach((event, index) => {
-        // Get coordinates
-        let lat, lng;
-        if (event.coordinates && event.coordinates.latitude !== undefined) {
-            lat = event.coordinates.latitude;
-            lng = event.coordinates.longitude;
-        } else if (event.coordinates) {
-            lat = event.coordinates.lat;
-            lng = event.coordinates.lng;
-        } else {
-            console.error("Invalid coordinates for event:", event);
-            return;
-        }
-
-        // Create marker with number label
-        const markerIcon = createNumberedMarkerIcon(index + 1, event.type);
-        const marker = L.marker([lat, lng], {
-            icon: markerIcon,
-            riseOnHover: true
-        });
-
-        // Store event type for clustering
-        marker.eventType = event.type;
-
-        // Create popup content
-        const popupContent = document.createElement('div');
-        popupContent.className = 'marker-popup';
-
-        const title = document.createElement('div');
-        title.className = 'marker-title';
-        title.innerText = event.location || 'Untitled Location';
-        popupContent.appendChild(title);
-
-        if (event.description && event.description.trim() !== '') {
-            const description = document.createElement('div');
-            description.className = 'marker-description';
-            description.innerText = event.description;
-            popupContent.appendChild(description);
-        }
-
-        // Format the date
-        let dateString = "";
-        if (event.date) {
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"];
-
-            if (event.date.month && event.date.day) {
-                // Full date
-                const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
-                dateString = `${monthName} ${event.date.day}, ${event.date.year}`;
-            } else if (event.date.month) {
-                // Month and year
-                const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
-                dateString = `${monthName} ${event.date.year}`;
-            } else {
-                // Year only
-                dateString = `${event.date.year}`;
-            }
-        }
-
-        const dateText = document.createElement('div');
-        dateText.className = 'marker-date';
-        dateText.innerText = dateString;
-        popupContent.appendChild(dateText);
-
-        marker.bindPopup(popupContent);
-        journeyClusterGroup.addLayer(marker); // Add to cluster group instead of directly to layer
-        eventMarkers.push(marker);
-
-        // Draw arrow to next event if not the last one
-        if (index < criminalEvents.length - 1) {
-            const nextEvent = criminalEvents[index + 1];
-            let nextLat, nextLng;
-
-            if (nextEvent.coordinates && nextEvent.coordinates.latitude !== undefined) {
-                nextLat = nextEvent.coordinates.latitude;
-                nextLng = nextEvent.coordinates.longitude;
-            } else if (nextEvent.coordinates) {
-                nextLat = nextEvent.coordinates.lat;
-                nextLng = nextEvent.coordinates.lng;
-            }
-
-            if (nextLat && nextLng) {
-                const arrow = createArrow([lat, lng], [nextLat, nextLng], event.type);
-                criminalJourneyLayer.addLayer(arrow);
-            }
-        }
-    });
-
-    // Fit the map to show all events
-    if (eventMarkers.length > 0) {
-        const group = L.featureGroup(eventMarkers);
-        map.fitBounds(group.getBounds().pad(0.1));
-    }
-
-    // Update the timeline info panel
-    updateTimelineInfo(criminalId);
-}
-
-// Create a numbered marker icon
-function createNumberedMarkerIcon(number, eventType) {
-    let markerColor;
-
-    if (eventType === 'forgery') {
-        markerColor = colorConfig.forgeryColor;
-    } else if (eventType === 'escape') {
-        markerColor = colorConfig.escapeColor;
-    } else if (eventType === 'arrest') {
-        markerColor = colorConfig.arrestColor;
-    } else {
-        markerColor = colorConfig.secondary;
-    }
-
-    return L.divIcon({
-        className: 'custom-numbered-marker',
-        html: `<div class="marker-number" style="background-color: ${markerColor};">${number}</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
-    });
-}
-
-// Create an arrow between two points
-function createArrow(fromPoint, toPoint, eventType) {
-    let arrowColor;
-
-    if (eventType === 'forgery') {
-        arrowColor = colorConfig.forgeryColor;
-    } else if (eventType === 'escape') {
-        arrowColor = colorConfig.escapeColor;
-    } else if (eventType === 'arrest') {
-        arrowColor = colorConfig.arrestColor;
-    } else {
-        arrowColor = colorConfig.secondary;
-    }
-
-    // Create a polyline with arrow markers
-    const arrow = L.polyline([fromPoint, toPoint], {
-        color: arrowColor,
-        weight: 3,
-        opacity: 0.7,
-        dashArray: '10, 10',
-        smoothFactor: 1
-    });
-
-    // Check if the Polyline Decorator plugin is available
-    if (typeof L.polylineDecorator === 'function') {
-        // Add arrow decorations
-        const arrowHead = L.polylineDecorator(arrow, {
-            patterns: [
-                {
-                    offset: '100%',
-                    repeat: 0,
-                    symbol: L.Symbol.arrowHead({
-                        pixelSize: 15,
-                        polygon: false,
-                        pathOptions: {
-                            stroke: true,
-                            color: arrowColor,
-                            weight: 3
-                        }
-                    })
+                // Check for location.latitude/longitude format
+                if (data.location && data.location.latitude !== undefined && data.location.longitude !== undefined) {
+                    hasValidCoordinates = true;
+                    coordinates = {
+                        latitude: data.location.latitude,
+                        longitude: data.location.longitude
+                    };
                 }
-            ]
+                // Check for coordinates.latitude/longitude format
+                else if (data.coordinates && data.coordinates.latitude !== undefined && data.coordinates.longitude !== undefined) {
+                    hasValidCoordinates = true;
+                    coordinates = {
+                        latitude: data.coordinates.latitude,
+                        longitude: data.coordinates.longitude
+                    };
+                }
+                // Check for coordinates.lat/lng format
+                else if (data.coordinates && data.coordinates.lat !== undefined && data.coordinates.lng !== undefined) {
+                    hasValidCoordinates = true;
+                    coordinates = {
+                        latitude: data.coordinates.lat,
+                        longitude: data.coordinates.lng
+                    };
+                }
+
+                if (hasValidCoordinates) {
+                    events.push({
+                        id: doc.id,
+                        type: data.type || 'Unknown',
+                        date: data.date,
+                        location: coordinates,
+                        description: data.description,
+                        locationName: extractLocationFromDescription(data.description, data.location_name, data.locationName)
+                    });
+                }
+            });
+
+            if (events.length === 0) {
+                console.log("No events found for this criminal.");
+                // Update the timeline info panel to show no events
+                updateTimelineInfo([], criminalId);
+                // Show the criminal details even if there are no events
+                showCriminalDetails(criminalId);
+                return;
+            }
+
+            // Sort events by date
+            events.sort((a, b) => {
+                if (!a.date || !b.date) return 0;
+                if (a.date.year !== b.date.year) return a.date.year - b.date.year;
+                if (a.date.month !== b.date.month) return (a.date.month || 0) - (b.date.month || 0);
+                return (a.date.day || 0) - (b.date.day || 0);
+            });
+
+            // Add points to journey in chronological order
+            events.forEach((event, index) => {
+                const lat = event.location.latitude;
+                const lng = event.location.longitude;
+                journeyPoints.push([lat, lng]);
+
+                // Create numbered marker icon based on event type using the utility function
+                const markerIcon = window.markerUtils_createNumberedMarkerIcon
+                    ? window.markerUtils_createNumberedMarkerIcon(index + 1, event.type)
+                    : createNumberedMarkerIcon(index + 1, event.type);
+
+                // Create marker for this event
+                const marker = L.marker([lat, lng], {
+                    icon: markerIcon,
+                    riseOnHover: true,
+                    title: event.description || 'Event'
+                });
+
+                // Add popup with event information
+                let popupContent = `
+                    <div class="event-popup">
+                        <div class="event-number">${index + 1}</div>
+                        <div class="event-type event-type-${event.type}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</div>
+                        <div class="event-date">${formatDate(event.date)}</div>
+                        <div class="event-location">${event.locationName}</div>
+                        ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+
+                // Add marker to journey cluster group
+                journeyClusterGroup.addLayer(marker);
+                eventMarkers.push(marker);
+
+                // Draw arrow to next event if not the last one
+                if (index < events.length - 1) {
+                    const nextEvent = events[index + 1];
+                    const nextLat = nextEvent.location.latitude;
+                    const nextLng = nextEvent.location.longitude;
+
+                    // Create arrow using the utility function
+                    const arrow = window.markerUtils_createArrow
+                        ? window.markerUtils_createArrow([lat, lng], [nextLat, nextLng], event.type)
+                        : createArrow([lat, lng], [nextLat, nextLng], event.type);
+                    window.criminalJourneyLayer.addLayer(arrow);
+                }
+            });
+
+            // Fit the map to show all events
+            if (eventMarkers.length > 0) {
+                const group = L.featureGroup(eventMarkers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+
+            // Update the timeline info panel
+            updateTimelineInfo(events, criminalId);
+
+            // Also show the criminal details
+            showCriminalDetails(criminalId);
+        })
+        .catch(error => {
+            console.error("Error fetching criminal journey:", error);
+            alert("Error loading criminal journey. Please try again later.");
         });
-
-        // Return a layer group with both the line and the arrow
-        return L.layerGroup([arrow, arrowHead]);
-    } else {
-        console.warn('Polyline Decorator plugin not available. Falling back to simple line.');
-        return arrow;
-    }
 }
 
-// Clear the criminal journey from the map
-function clearCriminalJourney() {
-    if (criminalJourneyLayer) {
-        map.removeLayer(criminalJourneyLayer);
-        criminalJourneyLayer = null;
-    }
-
-    // Clear the timeline info panel
-    document.getElementById('timeline-events').innerHTML = '';
-}
-
-// Update the timeline info panel
-function updateTimelineInfo(criminalId) {
+/**
+ * Update the timeline info panel with events
+ * @param {Array} events - Array of event objects
+ * @param {string} criminalId - ID of the criminal
+ */
+function updateTimelineInfo(events, criminalId) {
     const timelineEvents = document.getElementById('timeline-events');
     timelineEvents.innerHTML = '';
 
-    // Get the criminal name
-    const criminal = allCriminals.find(c => c.id === criminalId);
-    const criminalName = criminal ? criminal.name : 'Unknown Criminal';
+    if (events.length === 0) {
+        timelineEvents.innerHTML = '<p>No events found for this criminal.</p>';
+        return;
+    }
 
-    // Add criminal name to the panel header
-    const panelHeader = document.querySelector('#timeline-info h3');
-    panelHeader.innerText = `${criminalName}'s Journey`;
+    // Get the criminal name if available
+    if (firebase && firebase.firestore) {
+        firebase.firestore().collection('criminals').doc(criminalId).get().then((doc) => {
+            if (doc.exists) {
+                const criminal = doc.data();
+                const criminalName = criminal.name || 'Unknown Criminal';
 
-    // Add each event to the timeline
-    criminalEvents.forEach((event, index) => {
-        const eventItem = document.createElement('div');
-        eventItem.className = 'event-item';
-
-        // Format the date
-        let dateStr = "";
-        if (event.date) {
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"];
-
-            if (event.date.month && event.date.day) {
-                // Full date
-                const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
-                dateStr = `${monthName} ${event.date.day}, ${event.date.year}`;
-            } else if (event.date.month) {
-                // Month and year
-                const monthName = monthNames[event.date.month - 1] || `Month ${event.date.month}`;
-                dateStr = `${monthName} ${event.date.year}`;
-            } else {
-                // Year only
-                dateStr = `${event.date.year}`;
+                // Update the panel header
+                const panelHeader = document.querySelector('#timeline-info h3');
+                if (panelHeader) {
+                    panelHeader.innerText = `${criminalName}'s Journey`;
+                }
             }
-        }
+        }).catch(error => {
+            console.error("Error getting criminal name:", error);
+        });
+    }
+
+    // Add events to timeline in chronological order (already sorted)
+    events.forEach((event, index) => {
+        const eventItem = document.createElement('div');
+        eventItem.className = 'timeline-event';
+
+        // Format date
+        const dateStr = formatDate(event.date);
 
         // Create event type badge
         const eventTypeClass = `event-type event-type-${event.type}`;
 
-        // Create HTML for the event item
+        // Create HTML for the event item with numbered markers matching the map
         eventItem.innerHTML = `
             <div class="event-number">${index + 1}</div>
             <div class="event-date">${dateStr}</div>
-            <div class="event-location">${event.location}</div>
+            <div class="event-location">${event.locationName || 'Unknown Location'}</div>
             <span class="${eventTypeClass}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
             ${event.description && event.description.trim() !== '' ? `<div class="event-description">${event.description}</div>` : ''}
         `;
@@ -519,3 +309,102 @@ function updateTimelineInfo(criminalId) {
         timelineEvents.appendChild(eventItem);
     });
 }
+
+/**
+ * Initialize the criminal info panel
+ */
+function initCriminalModal() {
+    console.log("Initializing criminal info panel");
+    // No need for modal initialization since we're using a fixed panel
+}
+
+/**
+ * Show criminal details in the info panel
+ * @param {string} criminalId - ID of the criminal
+ */
+function showCriminalDetails(criminalId) {
+    console.log("Showing details for criminal:", criminalId);
+
+    // Get the criminal info panel element
+    const criminalInfoPanel = document.getElementById('criminal-info');
+
+    if (!criminalInfoPanel) {
+        console.error("Criminal info panel element not found");
+        return;
+    }
+
+    // Make sure the panel is visible
+    criminalInfoPanel.style.display = 'block';
+
+    // Fetch criminal details from Firestore
+    if (firebase && firebase.firestore) {
+        firebase.firestore().collection('criminals').doc(criminalId).get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+
+                // Build the HTML for the criminal info
+                let infoHTML = `<h3>${data.name || 'Unknown Criminal'}</h3>`;
+                infoHTML += '<div class="criminal-details">';
+
+                // Create a table-like structure for better formatting
+                const details = [];
+
+                if (data.alias) {
+                    details.push({label: 'Alias', value: data.alias});
+                }
+
+                if (data.birthdate) {
+                    details.push({label: 'Birth Date', value: data.birthdate});
+                }
+
+                if (data.birthplace) {
+                    details.push({label: 'Birth Place', value: data.birthplace});
+                }
+
+                if (data.prof) {
+                    details.push({label: 'Profession', value: data.prof});
+                }
+
+                if (data.nation) {
+                    details.push({label: 'Nationality', value: data.nation});
+                }
+
+                // Add all details with consistent formatting
+                details.forEach(detail => {
+                    infoHTML += `<p><strong>${detail.label}:</strong> ${detail.value}</p>`;
+                });
+
+                infoHTML += '</div>';
+
+                // Set the panel content
+                criminalInfoPanel.innerHTML = infoHTML;
+            } else {
+                console.log("No criminal found with ID:", criminalId);
+                criminalInfoPanel.innerHTML = '<p>No details found for this criminal.</p>';
+            }
+        }).catch(error => {
+            console.error("Error getting criminal:", error);
+            criminalInfoPanel.innerHTML = '<p>Error retrieving criminal details. Please try again.</p>';
+        });
+    } else {
+        console.error("Firebase not initialized");
+        criminalInfoPanel.innerHTML = '<p>Error: Firebase not initialized</p>';
+    }
+}
+
+// These functions are already defined above, so we're removing the duplicates
+
+// These functions are now imported from markerUtils.js
+
+// Clear the criminal journey from the map
+function clearCriminalJourney() {
+    if (window.criminalJourneyLayer) {
+        map.removeLayer(window.criminalJourneyLayer);
+        window.criminalJourneyLayer = null;
+    }
+
+    // Clear the timeline info panel
+    document.getElementById('timeline-events').innerHTML = '';
+}
+
+// This function is already defined above, so we're removing the duplicate

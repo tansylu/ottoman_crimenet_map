@@ -327,10 +327,19 @@ h1, h2, h3, h4, h5, h6 {
     right: 120px;
 }
 
+/* Unified marker styles */
 .marker-icon {
     background-color: transparent;
     border: none;
 }
+
+.marker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .marker-label {
     background-color: var(--neutral-light);
     border: 1px solid var(--accent);
@@ -352,18 +361,33 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
 }
-.marker-dot {
+
+/* Location symbol marker (using Font Awesome icons) */
+.marker-location-symbol {
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    border: 1.5px solid var(--neutral-light);
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    animation: pulse 2.5s infinite;
 }
-.marker-dot:hover {
+
+.marker-location-symbol i {
+    font-size: inherit;
+    color: inherit;
+}
+
+.marker-location-symbol:hover {
     transform: scale(1.5);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
 }
+
+/* Animation for all markers */
 @keyframes pulse {
     0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 0.9; }
     100% { transform: scale(1); opacity: 1; }
 }
 
@@ -495,15 +519,26 @@ h1, h2, h3, h4, h5, h6 {
     stroke: var(--primary) !important;
 }
 
-/* Increase the size of the marker number for better visibility */
+/* Numbered marker styles */
+.custom-numbered-marker {
+    background: none;
+    border: none;
+}
+
 .marker-number {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
-    font-family: 'Inter', sans-serif !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4) !important;
-    border: 2px solid var(--neutral-light) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--neutral-light);
+    animation: pulse 2.5s infinite;
 }
 
 /* Custom map styling */

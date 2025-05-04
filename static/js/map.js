@@ -56,55 +56,7 @@ function initMap() {
         spiderfyDistanceMultiplier: 3, // Spread markers much further when spiderfying
         spiderfyOnMaxZoom: true, // Always spiderfy at max zoom
         animate: false, // Disable animation for more immediate response
-        iconCreateFunction: function(cluster) {
-            // Count markers in the cluster
-            const count = cluster.getChildCount();
-
-            // Get marker types in this cluster to determine color
-            const markers = cluster.getAllChildMarkers();
-            let hasMultipleTypes = false;
-            let dominantType = '';
-
-            // Check if cluster has multiple event types
-            if (markers.length > 0) {
-                const types = {};
-                markers.forEach(marker => {
-                    if (marker.markerType) {
-                        types[marker.markerType] = (types[marker.markerType] || 0) + 1;
-                    }
-                });
-
-                // Find the dominant type
-                let maxCount = 0;
-                for (const type in types) {
-                    if (types[type] > maxCount) {
-                        maxCount = types[type];
-                        dominantType = type;
-                    }
-                }
-
-                // Check if there are multiple types
-                hasMultipleTypes = Object.keys(types).length > 1;
-            }
-
-            // Determine size based on count
-            let size = 'small';
-            if (count > 3) size = 'medium';
-            if (count > 6) size = 'large';
-
-            // Determine color based on dominant type or use mixed for multiple types
-            let colorClass = 'mixed';
-            if (!hasMultipleTypes && dominantType) {
-                colorClass = dominantType;
-            }
-
-            // Create custom cluster icon with count
-            return L.divIcon({
-                html: `<div class="cluster-icon cluster-${size} cluster-${colorClass}">${count}</div>`,
-                className: 'custom-cluster-icon',
-                iconSize: L.point(50, 50)
-            });
-        },
+        iconCreateFunction: createClusterIcon,
         // Animate clusters when zooming
         animate: true,
         animateAddingMarkers: true

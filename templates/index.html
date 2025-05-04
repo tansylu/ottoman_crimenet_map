@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ottoman Crime Network Map</title>
+    <title>Ottoman Crime Network</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
@@ -12,59 +11,106 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/styles/colors.css">
     <link rel="stylesheet" href="/static/styles/main.css">
+    <link rel="stylesheet" href="/static/styles/one_pager.css">
 </head>
 <body>
-    <div id="map"></div>
-    <div id="time-slider-container">
-        <div id="current-year">1854</div>
-        <div id="time-slider"></div>
-    </div>
 
-    <!-- Time controls in fixed position outside the slider container -->
-    <div id="time-controls">
-        <button id="prev-year" title="Previous Year">&laquo;</button>
-        <button id="play-pause" title="Play/Pause">▶</button>
-        <button id="next-year" title="Next Year">&raquo;</button>
-    </div>
-
-    <button id="reset-view" class="reset-button">Reset View</button>
-    <button id="toggle-borders" class="map-button">Hide Ottoman Borders</button>
-
-    <!-- Navigation between views -->
-    <div id="view-navigation">
-        <a href="/criminals-map" class="nav-link">View Criminal Journeys</a>
-    </div>
-
-    <div class="legend">
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: var(--forgery-color);"></div>
-            <span>Forgery</span>
+    <section>
+        <div class="intro">
+            <h2>About This Project</h2>
+            <p>This interactive map visualizes criminal activities and networks across the Ottoman Empire during the late 19th century. The data is based on historical records and archives, providing insights into patterns of crime, movement of criminals, and law enforcement responses during this period.</p>
+            <p>Use the tabs below to switch between two different views: the Events Map shows all criminal events by year, while the Criminal Journeys Map allows you to follow the movements of individual criminals across the empire.</p>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: var(--escape-color);"></div>
-            <span>Escape</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background-color: var(--arrest-color);"></div>
-            <span>Arrest</span>
-        </div>
-    </div>
 
-    <!-- Modal for detailed criminal information -->
-    <div id="criminal-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modal-name"></h2>
-            <div id="modal-details"></div>
+        <div class="map-tabs">
+            <div class="map-tab active" data-map="events">Events Map</div>
+            <div class="map-tab" data-map="criminals">Criminal Journeys</div>
         </div>
-    </div>
+
+        <div class="map-container">
+            <!-- Events Map View -->
+            <div class="map-view active" id="events-view">
+                <div id="events-map"></div>
+                <div id="time-slider-container" class="time-slider-container">
+                    <div id="current-year">1854</div>
+                    <div id="time-slider"></div>
+                </div>
+                <div id="time-controls" class="time-controls">
+                    <button id="prev-year" title="Previous Year">&laquo;</button>
+                    <button id="play-pause" title="Play/Pause">▶</button>
+                    <button id="next-year" title="Next Year">&raquo;</button>
+                </div>
+                <button id="reset-view-events" class="reset-button">Reset View</button>
+                <button id="toggle-borders-events" class="map-button">Hide Ottoman Borders</button>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--forgery-color);"></div>
+                        <span>Forgery</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--escape-color);"></div>
+                        <span>Escape</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--arrest-color);"></div>
+                        <span>Arrest</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criminals Map View -->
+            <div class="map-view" id="criminals-view">
+                <div id="criminals-map"></div>
+                <div id="criminal-selector-container">
+                    <label for="criminal-selector">Select Criminal:</label>
+                    <select id="criminal-selector">
+                        <option value="">-- Select a criminal --</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <button id="reset-view-criminals" class="reset-button">Reset View</button>
+                <button id="toggle-borders-criminals" class="map-button">Hide Ottoman Borders</button>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--forgery-color);"></div>
+                        <span>Forgery</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--escape-color);"></div>
+                        <span>Escape</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--arrest-color);"></div>
+                        <span>Arrest</span>
+                    </div>
+                </div>
+                <!-- Timeline info panel for criminal journeys -->
+                <div id="timeline-info" class="info-panel">
+                    <h3>Criminal Journey</h3>
+                    <div id="timeline-events">
+                        <!-- Timeline events will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Criminal info panel (left bottom corner) -->
+                <div id="criminal-info" class="info-panel criminal-info-panel">
+                    <!-- Criminal details will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Firebase configuration data -->
     <script id="firebase-config" type="application/json">
         {{ firebase_config | tojson }}
     </script>
+
+    <footer>
+        <p>Ottoman Crime Network Map &copy; 2023 | PURE '2025 at Sabanci University</p>
+    </footer>
 
     <!-- External libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -72,14 +118,17 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.js"></script>
 
     <!-- Application modules -->
     <script src="/static/js/colorConfig.js"></script>
-    <script src="/static/js/map.js"></script>
-    <script src="/static/js/timeSlider.js"></script>
-    <script src="/static/js/markers.js"></script>
-    <script src="/static/js/criminals.js"></script>
+    <script src="/static/js/markerUtils.js"></script>
+    <script src="/static/js/mapUtils.js"></script>
     <script src="/static/js/borders.js"></script>
+    <script src="/static/js/eventsMap.js"></script>
+    <script src="/static/js/criminalsMap.js"></script>
+
+    <!-- One-pager integration script -->
     <script src="/static/js/main.js"></script>
 </body>
 </html>

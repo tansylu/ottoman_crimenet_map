@@ -66,56 +66,22 @@ function createMarker(docSnapshot, showPopup = false) {
         return null; // Skip this marker
     }
 
-    const markerType = data.type; // 'forgery', 'escape', or 'arrest'
-
-    // Different icons for different types of events
-    let markerIcon;
-    let markerColor;
-
-    // Responsive marker size based on screen width
-    let markerSize = 14; // Default size
-    if (window.innerWidth <= 768) {
-        markerSize = 12; // Medium screens
-    }
-    if (window.innerWidth <= 480) {
-        markerSize = 10; // Small screens
-    }
-
-    // Get location name for the label
+    const markerType = data.type || 'default'; // 'forgery', 'escape', or 'arrest'
     const locationName = data.location || 'Unknown';
 
-    if (markerType === 'forgery') {
-        markerColor = colorConfig.forgeryColor;
-    } else if (markerType === 'escape') {
-        markerColor = colorConfig.escapeColor;
-    } else if (markerType === 'arrest') {
-        markerColor = colorConfig.arrestColor;
-    } else {
-        // Default marker for any other types
-        markerColor = colorConfig.secondary;
+    // Responsive marker size based on screen width
+    let markerSize = 24; // Default size
+    if (window.innerWidth <= 768) {
+        markerSize = 20; // Medium screens
+    }
+    if (window.innerWidth <= 480) {
+        markerSize = 18; // Small screens
     }
 
-    // Create HTML for the marker with animation and label
-    const markerHtml = `
-        <div class="marker-container">
-            <div class="marker-dot" style="background-color: ${markerColor}; width: ${markerSize}px; height: ${markerSize}px; border-radius: 50%; animation: pulse 2s infinite;"></div>
-            <div class="marker-label">${locationName}</div>
-        </div>
-    `;
-
-    markerIcon = L.divIcon({
-        html: markerHtml,
-        className: 'marker-icon',
-        iconSize: [Math.max(markerSize + 20, 120), markerSize + 50], // Make room for the label, ensure minimum width
-        iconAnchor: [Math.max(markerSize + 20, 120)/2, markerSize/2] // Center the icon on the coordinates
-    });
-
-    // Create the marker with custom icon
-    const marker = L.marker([lat, lng], {
-        icon: markerIcon,
-        // Add additional properties for clustering
-        riseOnHover: true, // Bring to front on hover
-        title: locationName // Tooltip on hover
+    // Create the marker using the utility function
+    const marker = createLocationMarker(lat, lng, locationName, markerType, {
+        size: markerSize,
+        showLabel: true
     });
 
     // Create popup content
