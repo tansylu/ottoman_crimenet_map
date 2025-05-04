@@ -1,5 +1,8 @@
 // Global variables for map functionality
-let map;
+// Check if map is already defined
+if (typeof map === 'undefined') {
+    let map;
+}
 let initialView;
 let allMarkers = [];
 let visibleMarkers = [];
@@ -7,7 +10,10 @@ let markerData = {};
 let markerClusterGroup; // Cluster group for markers
 
 // Initialize Firebase and Firestore
-let db;
+// Check if db is already defined
+if (typeof db === 'undefined') {
+    let db;
+}
 
 // Initialize the map
 function initMap() {

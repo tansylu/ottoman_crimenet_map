@@ -1,7 +1,10 @@
 // Ottoman Crime Network Map - Criminals Map Module
 
 // Variables for the criminals map
-let selectedCriminalId = null;
+// Check if selectedCriminalId is already defined
+if (typeof selectedCriminalId === 'undefined') {
+    let selectedCriminalId = null;
+}
 let criminalJourneyLayer = null;
 let allCriminals = [];
 let criminalEvents = [];
