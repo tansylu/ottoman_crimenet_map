@@ -44,14 +44,20 @@ if (typeof extractLocationFromDescription !== 'function') {
 
         // Try to extract from description
         if (description) {
-            // Look for "in [Location]" pattern
-            const inMatch = description.match(/\bin\s+([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+            // Look for "in [Word]" or "In [Word]" pattern - only take the next word
+            const inMatch = description.match(/\b(?:in|In)\s+([A-Za-z]+)/);
             if (inMatch && inMatch[1]) {
                 return inMatch[1].trim();
             }
 
-            // Look for location at the beginning of the description
-            const startMatch = description.match(/^([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+            // Look for "met at [Word]" or "Met at [Word]" pattern - only take the next word
+            const metAtMatch = description.match(/\b(?:met at|Met at)\s+([A-Za-z]+)/);
+            if (metAtMatch && metAtMatch[1]) {
+                return metAtMatch[1].trim();
+            }
+
+            // Look for location at the beginning of the description - only take the first word
+            const startMatch = description.match(/^([A-Z][a-zA-z]+)/);
             if (startMatch && startMatch[1]) {
                 return startMatch[1].trim();
             }
@@ -105,6 +111,10 @@ function fetchCriminals(db, map) {
         // Add event listener to the criminal selector
         criminalSelector.addEventListener('change', function() {
             const criminalId = this.value;
+
+            // Immediately blur the select element to collapse the dropdown
+            this.blur();
+
             if (criminalId) {
                 showCriminalJourney(criminalId, db, map);
             } else {
@@ -369,9 +379,11 @@ function updateTimelineInfo(events, criminalId, markers) {
         // Create HTML for the event item with numbered markers matching the map
         eventItem.innerHTML = `
             <div class="event-number">${index + 1}</div>
-            <div class="event-date">${dateStr}</div>
+            <div class="event-header">
+                <span class="event-date">${dateStr}</span>
+                <span class="${eventTypeClass}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
+            </div>
             <div class="event-location">${event.locationName || 'Unknown Location'}</div>
-            <span class="${eventTypeClass}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
             ${event.description && event.description.trim() !== '' ? `<div class="event-description">${event.description}</div>` : ''}
         `;
 
@@ -390,9 +402,6 @@ function updateTimelineInfo(events, criminalId, markers) {
                 if (window.criminalsMapInstance) {
                     window.criminalsMapInstance.setView(marker.getLatLng(), window.criminalsMapInstance.getZoom());
                     // Flash the marker
-                    const icon = marker.getIcon();
-                    const originalIconUrl = icon.options.iconUrl;
-
                     // Create a highlighted version of the icon if possible
                     if (window.markerUtils_createHighlightedMarkerIcon) {
                         const highlightedIcon = window.markerUtils_createHighlightedMarkerIcon(index + 1, event.type);
@@ -438,7 +447,6 @@ function showCriminalDetails(criminalId) {
 
     // We're always in the standalone page context for criminal_journeys.html
     // No need to check for landing page context anymore
-    const isLandingPage = false;
 
     if (!targetElement) {
         console.error("Criminal description element not found");

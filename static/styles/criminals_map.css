@@ -8,9 +8,13 @@
 /* Map container styling */
 #map-container {
     position: relative;
-    width: 100%;
+    width: 90%;
     height: calc(100vh - 150px); /* Adjust height to account for selector and description */
     overflow: hidden;
+    margin: 0 auto; /* Center the map container */
+    max-width: 1200px; /* Set a max-width for larger screens */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+    border-radius: 8px; /* Add rounded corners */
 }
 
 #criminals-map {
@@ -18,14 +22,32 @@
     height: 100%;
 }
 
-#criminal-selector-container {
+/* Section header to contain title and selector stacked vertically */
+.section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    padding: 10px 0 15px 0;
+    margin-bottom: 15px;
+}
+
+.section-header .section-subtitle-wrapper {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#criminal-selector-container {
+    width: 90%; /* Set width to 90% */
+    overflow: visible; /* Changed from hidden to visible */
+    margin: 5px auto; /* Center the selector container */
+    padding: 10px 0;
     font-family: 'Inter', sans-serif;
     z-index: 1000;
     display: flex;
     align-items: center;
     box-sizing: border-box;
+    max-width: 1200px; /* Set a max-width for larger screens */
 }
 
 #criminal-selector-heading {
@@ -36,24 +58,26 @@
     position: relative;
     padding: 0;
     font-family: 'Playfair Display', serif;
-    text-align: left;
-    display: inline-block;
+    text-align: center; /* Center the text */
+    display: inline-block; /* Keep as inline-block */
 }
 
 #criminal-selector-heading::after {
     content: '';
     position: absolute;
     bottom: -8px;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%); /* Center the underline */
     width: 80px;
     height: 2px;
     background-color: var(--accent);
     border-radius: 2px;
 }
 
+/* Custom styling for the dropdown */
 #criminal-selector {
     width: 100%;
-    padding: 10px;
+    padding: 12px 15px;
     border-radius: 6px;
     border: 1px solid var(--accent);
     font-size: 15px;
@@ -64,6 +88,71 @@
     transition: all 0.3s ease;
     margin-top: 5px;
     max-width: none; /* Ensure no max-width restriction */
+    font-weight: 500; /* Slightly bolder text */
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A2A40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px; /* Make room for the custom arrow */
+}
+
+/* Remove default arrow in IE */
+#criminal-selector::-ms-expand {
+    display: none;
+}
+
+/* Style the dropdown options */
+#criminal-selector option {
+    padding: 8px;
+    background-color: var(--neutral-light);
+    color: var(--neutral-dark);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Limit dropdown height in Chrome/Safari */
+select#criminal-selector {
+    background-color: var(--neutral-light);
+}
+
+/* This is a hack to limit dropdown height in modern browsers */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    select#criminal-selector {
+        height: 40px; /* Height of the select element */
+    }
+
+    select#criminal-selector[size]:focus {
+        height: 200px; /* Height of the dropdown when open */
+    }
+}
+
+/* For Firefox */
+@-moz-document url-prefix() {
+    #criminal-selector {
+        overflow-y: auto;
+        max-height: 200px; /* Reduced from 300px */
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) #f1f1f1;
+    }
+}
+
+/* For Chrome and other browsers that support these properties */
+#criminal-selector::-webkit-scrollbar {
+    width: 6px; /* Thinner scrollbar */
+}
+
+#criminal-selector::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#criminal-selector::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+#criminal-selector::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
 }
 
 #criminal-selector:focus {
@@ -74,7 +163,10 @@
 
 /* Criminal description box below the selector */
 #criminal-description {
-    width: 100%;
+    width: 90%;
+    overflow: hidden;
+    margin: 0 auto; /* Center the map container */
+    max-width: 1200px; /* Set a max-width for larger screens */
     padding: 15px 20px;
     background-color: var(--mint-beige);
     border-radius: 6px;
@@ -136,7 +228,7 @@
 
 .info-panel {
     position: absolute;
-    bottom: 30px;
+    top: 60px; /* Position below the criminal selector */
     left: 20px;
     z-index: 1000;
     background-color: var(--neutral-light);
@@ -172,11 +264,45 @@
     border-radius: 2px;
 }
 
-.event-item {
+.event-item, .timeline-event {
     margin-bottom: 15px;
-    padding-bottom: 12px;
-    border-bottom: 1px dotted var(--accent);
+    padding: 10px;
+    border-radius: 6px;
     line-height: 1.5;
+    position: relative;
+    background-color: rgba(var(--accent-rgb, 212, 196, 168), 0.1);
+    border-left: 3px solid var(--accent);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Add connecting line between timeline events */
+.event-item:not(:last-child)::after,
+.timeline-event:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 10px;
+    width: 2px;
+    height: 15px;
+    background-color: var(--accent);
+    opacity: 0.5;
+}
+
+.event-number {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: bold;
+    margin-right: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+    top: -1px;
 }
 
 .event-date {
@@ -256,10 +382,15 @@
         padding: 0 20px;
     }
 
-    #criminal-selector-container {
+    .section-header {
         flex-direction: column;
-        align-items: flex-start;
-        padding: 10px 0;
+        align-items: center;
+    }
+
+    #criminal-selector-container {
+        width: 100%;
+        margin-top: 10px;
+        padding: 5px 0;
     }
 
     #criminal-selector-heading {
@@ -279,8 +410,10 @@
     }
 
     .info-panel {
-        max-width: 250px;
-        max-height: 200px;
+        max-width: 350px;
+        max-height: 250px;
+        top: 60px;
+        left: 15px;
     }
 
     #map-container {
@@ -299,8 +432,14 @@
         margin-bottom: 12px;
     }
 
+    .section-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
     #criminal-selector-container {
-        padding: 8px 0;
+        padding: 5px 0;
         width: 100%;
     }
 

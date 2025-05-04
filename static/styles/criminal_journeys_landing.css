@@ -245,40 +245,65 @@
 /* Timeline info panel */
 #timeline-info {
     position: absolute;
-    bottom: 10px;
+    top: 60px; /* Position below the criminal selector */
     left: 10px;
     width: 500px; /* Increased from 350px */
     max-width: 60%; /* Increased from 40% */
-    height: 150px;
-    max-height: 150px;
+    height: 200px; /* Increased from 150px for more visibility */
+    max-height: 200px; /* Increased from 150px */
     overflow-y: auto;
-    background-color: var(--neutral-light);
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--accent);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(166, 123, 91, 0.5); /* Semi-transparent border */
     font-size: 12px;
     z-index: 1000;
+    backdrop-filter: blur(5px); /* Add blur effect for modern browsers */
+    -webkit-backdrop-filter: blur(5px); /* For Safari */
 }
 
 /* Timeline events styling */
 .criminal-journeys-layout .timeline-event {
-    margin-bottom: 8px;
-    padding-bottom: 5px;
-    border-bottom: 1px dotted var(--accent);
-    padding: 5px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
     cursor: pointer;
     font-size: 13px;
-    line-height: 1.3;
+    line-height: 1.2;
+    position: relative;
+    background-color: rgba(var(--accent-rgb, 212, 196, 168), 0.08); /* More transparent */
+    border-left: 3px solid rgba(166, 123, 91, 0.6); /* Semi-transparent border */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); /* Lighter shadow */
+}
+
+/* Event header to contain date and type on one line */
+.criminal-journeys-layout .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+/* Add connecting line between timeline events */
+.criminal-journeys-layout .timeline-event:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 10px;
+    width: 2px;
+    height: 15px;
+    background-color: var(--accent);
+    opacity: 0.5;
 }
 
 /* Highlighted timeline event */
 .criminal-journeys-layout .timeline-event.highlighted {
-    background-color: rgba(var(--accent-rgb, 166, 123, 91), 0.15);
-    border-left: 3px solid var(--accent, #a67b5b);
-    padding-left: 8px;
+    background-color: rgba(var(--accent-rgb, 166, 123, 91), 0.15); /* More transparent */
+    border-left: 4px solid rgba(26, 42, 64, 0.7); /* Semi-transparent primary color */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07); /* Lighter shadow */
+    transform: translateX(3px);
 }
 
 /* Make the timeline info panel header smaller */
@@ -292,32 +317,41 @@
 
 .criminal-journeys-layout .event-number {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
     text-align: center;
-    background-color: var(--primary);
+    background-color: rgba(26, 42, 64, 0.8); /* Semi-transparent primary color */
     color: white;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: bold;
-    margin-right: 5px;
+    margin-right: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+    position: relative;
+    top: -1px;
 }
 
 .criminal-journeys-layout .event-date {
     font-weight: 600;
-    margin: 5px 0;
+    margin: 0;
+    display: inline-block;
 }
 
 .criminal-journeys-layout .event-location {
     font-style: italic;
-    margin: 3px 0;
+    margin: 2px 0;
+    font-size: 12px;
+    color: var(--secondary);
 }
 
 .criminal-journeys-layout .event-description {
-    font-size: 13px;
-    margin-top: 5px;
-    line-height: 1.4;
+    font-size: 12px;
+    margin-top: 3px;
+    line-height: 1.3;
+    color: var(--neutral-dark);
+    border-top: 1px dotted rgba(var(--accent-rgb, 212, 196, 168), 0.5);
+    padding-top: 3px;
 }
 
 /* Initial message for criminal info panel */
@@ -449,6 +483,8 @@
     max-width: 500px; /* Increased from 350px */
     max-height: 50vh;
     overflow-y: auto;
+    top: 60px; /* Ensure consistent positioning in fullscreen mode */
+    left: 10px;
 }
 
 .criminal-journeys-container.fullscreen #criminal-info {

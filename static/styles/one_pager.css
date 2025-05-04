@@ -153,8 +153,8 @@ footer {
 
 /* Timeline panel */
 #timeline-info {
-    top: 10px;
-    right: 10px;
+    top: 60px; /* Position below the criminal selector */
+    left: 10px; /* Changed from right to left */
     width: 500px; /* Increased from 300px */
     max-width: 60%; /* Added max-width */
 }

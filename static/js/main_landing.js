@@ -155,14 +155,20 @@ function extractLocationFromDescription(description, locationName1, locationName
 
     // Try to extract from description
     if (description) {
-        // Look for "in [Location]" pattern
-        const inMatch = description.match(/\bin\s+([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+        // Look for "in [Word]" or "In [Word]" pattern - only take the next word
+        const inMatch = description.match(/\b(?:in|In)\s+([A-Za-z]+)/);
         if (inMatch && inMatch[1]) {
             return inMatch[1].trim();
         }
 
-        // Look for location at the beginning of the description
-        const startMatch = description.match(/^([A-Z][a-zA-Z\s]+)(?:[\.,]|\s|$)/);
+        // Look for "met at [Word]" or "Met at [Word]" pattern - only take the next word
+        const metAtMatch = description.match(/\b(?:met at|Met at)\s+([A-Za-z]+)/);
+        if (metAtMatch && metAtMatch[1]) {
+            return metAtMatch[1].trim();
+        }
+
+        // Look for location at the beginning of the description - only take the first word
+        const startMatch = description.match(/^([A-Z][a-zA-z]+)/);
         if (startMatch && startMatch[1]) {
             return startMatch[1].trim();
         }

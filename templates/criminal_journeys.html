@@ -17,16 +17,18 @@
 </head>
 <body>
 
-    <!-- Criminal selector as a section heading -->
+    <!-- Criminal journeys section with title and selector -->
     <div class="section-container">
-        <div class="section-subtitle-wrapper">
-            <h3 id="criminal-selector-heading">Criminal Journeys</h3>
-        </div>
-        <div id="criminal-selector-container">
-            <select id="criminal-selector">
-                <option value="">-- Select a criminal --</option>
-                <!-- Options will be populated dynamically -->
-            </select>
+        <div class="section-header">
+            <div class="section-subtitle-wrapper">
+                <h3 id="criminal-selector-heading">Criminal Journeys</h3>
+            </div>
+            <div id="criminal-selector-container">
+                <select id="criminal-selector" size="1">
+                    <option value="">-- Select a criminal --</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
         </div>
 
         <!-- Criminal description text box below the selector -->
@@ -83,6 +85,7 @@
     <!-- Removed criminals.js to avoid function name conflicts -->
     <script src="/static/js/borders.js"></script>
     <script src="/static/js/mapFullscreen.js"></script>
+    <script src="/static/js/dropdownControl.js"></script>
     <script src="/static/js/criminalsMap.js"></script>
 </body>
 </html>
