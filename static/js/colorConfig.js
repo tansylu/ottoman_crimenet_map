@@ -3,8 +3,8 @@
 // Modify these values to easily change the entire color scheme.
 
 // Check if colorConfig is already defined
-if (typeof colorConfig === 'undefined') {
-    const colorConfig = {
+if (typeof window.colorConfig === 'undefined') {
+    window.colorConfig = {
     // Primary Color Palette
     primary: '#4B3E2A', // Dark Olive Brown
     secondary: '#A67B5B', // Muted Copper
@@ -32,5 +32,5 @@ if (typeof colorConfig === 'undefined') {
 
 // Export the color configuration
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = colorConfig;
+    module.exports = window.colorConfig;
 }
