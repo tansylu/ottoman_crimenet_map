@@ -884,6 +884,8 @@ h1, h2, h3, h4, h5, h6 {
     margin: 30px auto; /* Center the table */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    max-height: 400px; /* Limit height to show about 5 rows */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .criminals-table {
@@ -905,7 +907,8 @@ h1, h2, h3, h4, h5, h6 {
     color: #fff;
     font-weight: 600;
     position: sticky;
-    top: 0;
+    top: 0; /* Keep header visible when scrolling */
+    z-index: 10; /* Ensure header stays above content when scrolling */
 }
 
 .criminals-table tr:nth-child(even) {

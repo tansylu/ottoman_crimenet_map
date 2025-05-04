@@ -9,7 +9,7 @@
 #map-container {
     position: relative;
     width: 90%;
-    height: calc(100vh - 150px); /* Adjust height to account for selector and description */
+    height: 90vh; /* Changed from calc(100vh - 150px) to 90vh */
     overflow: hidden;
     margin: 0 auto; /* Center the map container */
     max-width: 1200px; /* Set a max-width for larger screens */
@@ -37,18 +37,6 @@
     margin-bottom: 10px;
 }
 
-#criminal-selector-container {
-    width: 90%; /* Set width to 90% */
-    overflow: visible; /* Changed from hidden to visible */
-    margin: 5px auto; /* Center the selector container */
-    padding: 10px 0;
-    font-family: 'Inter', sans-serif;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    max-width: 1200px; /* Set a max-width for larger screens */
-}
 
 #criminal-selector-heading {
     font-size: 1.6rem;
@@ -87,14 +75,11 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     margin-top: 5px;
-    max-width: none; /* Ensure no max-width restriction */
-    font-weight: 500; /* Slightly bolder text */
+    max-width: 1200px;
+    font-weight: 500;
     cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A2A40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
     background-size: 16px;
-    padding-right: 40px; /* Make room for the custom arrow */
+    padding-right: 40px;
 }
 
 /* Remove default arrow in IE */
@@ -118,11 +103,11 @@ select#criminal-selector {
 /* This is a hack to limit dropdown height in modern browsers */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
     select#criminal-selector {
-        height: 40px; /* Height of the select element */
+        height: 40px;
     }
 
     select#criminal-selector[size]:focus {
-        height: 200px; /* Height of the dropdown when open */
+        height: 200px;
     }
 }
 
@@ -130,7 +115,7 @@ select#criminal-selector {
 @-moz-document url-prefix() {
     #criminal-selector {
         overflow-y: auto;
-        max-height: 200px; /* Reduced from 300px */
+        max-height: 200px;
         scrollbar-width: thin;
         scrollbar-color: var(--accent) #f1f1f1;
     }
@@ -138,7 +123,7 @@ select#criminal-selector {
 
 /* For Chrome and other browsers that support these properties */
 #criminal-selector::-webkit-scrollbar {
-    width: 6px; /* Thinner scrollbar */
+    width: 6px;
 }
 
 #criminal-selector::-webkit-scrollbar-track {
@@ -226,16 +211,17 @@ select#criminal-selector {
 
 /* Diplomat selector styling - matches criminal selector */
 #diplomat-selector-container {
-    width: 90%; /* Set width to 90% */
-    overflow: visible; /* Changed from hidden to visible */
+    width: 90%; /* Container remains 90% width */
+    overflow: visible;
     margin: 5px auto; /* Center the selector container */
     padding: 10px 0;
     font-family: 'Inter', sans-serif;
     z-index: 1000;
     display: flex;
-    align-items: center;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center horizontally */
     box-sizing: border-box;
-    max-width: 1200px; /* Set a max-width for larger screens */
+    max-width: 1200px;
 }
 
 #diplomat-selector-heading {
@@ -264,7 +250,7 @@ select#criminal-selector {
 
 /* Custom styling for the dropdown */
 #diplomat-selector {
-    width: 100%;
+    width: 50%; /* Set width to 50% */
     padding: 12px 15px;
     border-radius: 6px;
     border: 1px solid var(--accent);
@@ -275,14 +261,13 @@ select#criminal-selector {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     margin-top: 5px;
-    max-width: none; /* Ensure no max-width restriction */
-    font-weight: 500; /* Slightly bolder text */
+    font-weight: 500;
     cursor: pointer;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A2A40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 16px;
-    padding-right: 40px; /* Make room for the custom arrow */
+    padding-right: 40px;
 }
 
 /* Remove default arrow in IE */
@@ -296,6 +281,12 @@ select#criminal-selector {
     background-color: var(--neutral-light);
     color: var(--neutral-dark);
     font-family: 'Inter', sans-serif;
+    margin: 4px 0; /* Add vertical margin between options */
+}
+
+/* Add this new rule for dropdown options */
+#diplomat-selector option:not(:first-of-type) {
+    margin-top: 4px; /* Add space above each option except the first */
 }
 
 /* Limit dropdown height in Chrome/Safari */
