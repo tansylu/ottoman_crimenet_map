@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Firebase initialized successfully");
 
         // Initialize the criminals map for the mobility map section
-        // Make sure the map is properly sized within its container
         const criminalsMapContainer = document.querySelector('.criminal-journeys-container');
         if (!criminalsMapContainer) {
             console.error("Criminal journeys container not found");
@@ -56,14 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.criminalsMapInstance = criminalsMap;
         console.log("Map initialized and stored in global variable");
 
-        // Initialize fullscreen functionality after map is created
-        if (typeof initFullscreenToggle === 'function') {
-            initFullscreenToggle(criminalsMap);
-            console.log("Fullscreen toggle initialized");
-        } else {
-            console.warn("initFullscreenToggle function not found");
-        }
-
         // Add tile layer to the criminals map
         const tileLayer = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -89,14 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn("initBorders function not found");
         }
 
-        // Initialize criminal modal
-        if (typeof initCriminalModal === 'function') {
-            initCriminalModal();
-            console.log("Criminal modal initialized");
-        } else {
-            console.warn("initCriminalModal function not found");
-        }
-
         // Fetch criminals for the criminals map with a slight delay to ensure everything is initialized
         if (typeof fetchCriminals === 'function') {
             console.log("Scheduling fetchCriminals call");
@@ -108,20 +91,90 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("fetchCriminals function not found");
         }
 
-        // Handle window resize for the criminals map
+        // Initialize letter communications map
+        const communicationsMapElement = document.getElementById('communications-map');
+        if (communicationsMapElement) {
+            console.log("Initializing letter communications map");
+            
+            // Ensure the container is visible
+            document.querySelector('.communications-container').style.display = 'block';
+            
+            // Initialize the communications map
+            const communicationsMap = L.map('communications-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([41.0, 29.0], 6);
+            
+            // Store in global variable
+            window.communicationsMapInstance = communicationsMap;
+            
+            // Add tile layer
+            L.tileLayer(tileLayer, {
+                attribution: attribution,
+                maxZoom: 19,
+                className: 'historical-map-tiles'
+            }).addTo(communicationsMap);
+            
+            // Add zoom control
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(communicationsMap);
+            
+            // Initialize Ottoman borders for communications map
+            if (typeof initBorders === 'function') {
+                initBorders(communicationsMap);
+                console.log("Ottoman borders initialized for communications map");
+            }
+            
+            // Fetch and display letter communications
+            if (typeof fetchLetterCommunications === 'function') {
+                setTimeout(function() {
+                    fetchLetterCommunications(db, communicationsMap);
+                }, 1000);
+            } 
+            if (typeof fetchDiplomats === 'function') {
+                console.log("About to call fetchDiplomats function");
+                if (typeof fetchDiplomats === 'function') {
+                    console.log("fetchDiplomats function exists, calling it now");
+                    fetchDiplomats(db, communicationsMap);
+                } else {
+                    console.error("fetchDiplomats function not found!");
+                }
+            } else {
+                console.warn("fetchLetterCommunications and fetchDiplomats functions not found");
+            }
+            
+            console.log("Letter communications map fully initialized");
+        } else {
+            console.log("Communications map element not found on this page");
+        }
+
+        // Handle window resize for both maps
         window.addEventListener('resize', function() {
-            // Invalidate the map size to ensure it renders correctly after resize
+            // Criminal map resize
             criminalsMap.invalidateSize();
             console.log("Map size invalidated after resize");
 
             // Ensure the map container is properly sized
             const criminalsMapContainer = document.querySelector('.criminal-journeys-container');
             if (criminalsMapContainer && criminalsMapContainer.offsetHeight > 0) {
-                // Force a redraw of the map
                 setTimeout(function() {
                     criminalsMap.invalidateSize();
                     console.log("Map size invalidated again after container resize");
                 }, 100);
+            }
+            
+            // Communications map resize
+            if (window.communicationsMapInstance) {
+                window.communicationsMapInstance.invalidateSize();
+                console.log("Communications map size invalidated after resize");
+                
+                const commContainer = document.querySelector('.communications-container');
+                if (commContainer && commContainer.offsetHeight > 0) {
+                    setTimeout(function() {
+                        window.communicationsMapInstance.invalidateSize();
+                    }, 100);
+                }
             }
         });
 

@@ -224,6 +224,194 @@ select#criminal-selector {
     margin-right: 5px;
 }
 
+/* Diplomat selector styling - matches criminal selector */
+#diplomat-selector-container {
+    width: 90%; /* Set width to 90% */
+    overflow: visible; /* Changed from hidden to visible */
+    margin: 5px auto; /* Center the selector container */
+    padding: 10px 0;
+    font-family: 'Inter', sans-serif;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    max-width: 1200px; /* Set a max-width for larger screens */
+}
+
+#diplomat-selector-heading {
+    font-size: 1.6rem;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: var(--primary);
+    position: relative;
+    padding: 0;
+    font-family: 'Playfair Display', serif;
+    text-align: center; /* Center the text */
+    display: inline-block; /* Keep as inline-block */
+}
+
+#diplomat-selector-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%); /* Center the underline */
+    width: 80px;
+    height: 2px;
+    background-color: var(--accent);
+    border-radius: 2px;
+}
+
+/* Custom styling for the dropdown */
+#diplomat-selector {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: var(--neutral-dark);
+    background-color: var(--neutral-light);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    margin-top: 5px;
+    max-width: none; /* Ensure no max-width restriction */
+    font-weight: 500; /* Slightly bolder text */
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A2A40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px; /* Make room for the custom arrow */
+}
+
+/* Remove default arrow in IE */
+#diplomat-selector::-ms-expand {
+    display: none;
+}
+
+/* Style the dropdown options */
+#diplomat-selector option {
+    padding: 8px;
+    background-color: var(--neutral-light);
+    color: var(--neutral-dark);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Limit dropdown height in Chrome/Safari */
+select#diplomat-selector {
+    background-color: var(--neutral-light);
+}
+
+/* This is a hack to limit dropdown height in modern browsers */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    select#diplomat-selector {
+        height: 40px; /* Height of the select element */
+    }
+
+    select#diplomat-selector[size]:focus {
+        height: 200px; /* Height of the dropdown when open */
+    }
+}
+
+/* For Firefox */
+@-moz-document url-prefix() {
+    #diplomat-selector {
+        overflow-y: auto;
+        max-height: 200px; /* Reduced from 300px */
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) #f1f1f1;
+    }
+}
+
+/* For Chrome and other browsers that support these properties */
+#diplomat-selector::-webkit-scrollbar {
+    width: 6px; /* Thinner scrollbar */
+}
+
+#diplomat-selector::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#diplomat-selector::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+#diplomat-selector::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+}
+
+#diplomat-selector:focus {
+    border-color: var(--secondary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(166, 123, 91, 0.25);
+}
+
+/* Diplomat description box below the selector */
+#diplomat-description {
+    width: 90%;
+    overflow: hidden;
+    margin: 0 auto; /* Center the map container */
+    max-width: 1200px; /* Set a max-width for larger screens */
+    padding: 15px 20px;
+    background-color: var(--mint-beige);
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    color: var(--neutral-dark);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+#diplomat-description .initial-message {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 16px;
+}
+
+#diplomat-description h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-family: 'Playfair Display', serif;
+    color: var(--primary);
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+#diplomat-description h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), var(--primary));
+    border-radius: 2px;
+}
+
+#diplomat-description .diplomat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#diplomat-description .diplomat-detail {
+    line-height: 1.4;
+}
+
+#diplomat-description .diplomat-detail strong {
+    color: var(--primary);
+    margin-right: 5px;
+}
+
 /* Navigation styles moved to main.css */
 
 .info-panel {
