@@ -16,7 +16,7 @@ function fetchDiplomats(db, map) {
 
     // Get the diplomat selector dropdown
     const diplomatSelector = document.getElementById('diplomat-selector');
-    
+
     if (!diplomatSelector) {
         console.error("Diplomat selector not found");
         return;
@@ -86,13 +86,13 @@ function fetchDiplomats(db, map) {
  */
 function fetchDiplomatLetters(diplomatId, db, map) {
     console.log("Fetching letters for diplomat:", diplomatId);
-    
+
     if (communicationLayer) {
         map.removeLayer(communicationLayer);
     }
-    
+
     communicationLayer = L.layerGroup().addTo(map);
-    
+
     const communicationsClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 20,
@@ -103,7 +103,7 @@ function fetchDiplomatLetters(diplomatId, db, map) {
             let size = 'small';
             if (count > 3) size = 'medium';
             if (count > 6) size = 'large';
-            
+
             return L.divIcon({
                 html: `<div class="cluster-icon cluster-${size} cluster-mixed">${count}</div>`,
                 className: 'custom-cluster-icon',
@@ -111,42 +111,42 @@ function fetchDiplomatLetters(diplomatId, db, map) {
             });
         }
     });
-    
+
     communicationLayer.addLayer(communicationsClusterGroup);
-    
+
     // Get the selected diplomat's information
     const diplomat = allDiplomats.find(d => d.id === diplomatId);
     if (!diplomat) {
         console.error("Selected diplomat not found in allDiplomats array");
         return;
     }
-    
+
     console.log("Selected diplomat:", diplomat);
-    
+
     // Query letters where diplomat is sender OR receiver
     const letters = [];
-    
+
     // Get all communications and filter manually
     db.collection('communications')
         .get()
         .then(snapshot => {
             console.log(`Found ${snapshot.size} total communications`);
-            
+
             snapshot.forEach(doc => {
                 const data = doc.data();
-                
+
                 // Check if this diplomat is sender or receiver
                 // Convert names to IDs for comparison (lowercase with underscores)
                 const senderId = data.sender ? data.sender.replace(/\s+/g, '_').toLowerCase() : '';
                 const receiverId = data.receiver ? data.receiver.replace(/\s+/g, '_').toLowerCase() : '';
-                
+
                 if (senderId === diplomat.id || receiverId === diplomat.id) {
                     letters.push({...data, id: doc.id});
                 }
             });
-            
+
             console.log(`Found ${letters.length} letters for diplomat ${diplomat.name}`);
-            
+
             displayLettersOnMap(letters, diplomatId, map, communicationsClusterGroup);
         })
         .catch(error => {
@@ -167,15 +167,15 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
         updateDescriptionBox(`No letters found for this diplomat.`);
         return;
     }
-    
+
     const diplomat = allDiplomats.find(d => d.id === diplomatId);
     updateDescriptionBox(diplomat);
-    
+
     const markers = [];
-    
+
     letters.forEach((letter, index) => {
         if (!letter.sender_location || !letter.receiver_location) return;
-        
+
         // Get coordinates for sender and receiver
         getLocationCoordinates(letter.sender_location)
             .then(senderCoords => {
@@ -185,37 +185,37 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
                         const senderLng = senderCoords.lng;
                         const receiverLat = receiverCoords.lat;
                         const receiverLng = receiverCoords.lng;
-                        
+
                         // Create sender marker
                         const senderMarker = L.marker([senderLat, senderLng], {
                             icon: createMarkerIcon('sender', index + 1),
                             riseOnHover: true,
                             title: letter.sender || 'Sender'
                         });
-                        
+
                         // Create receiver marker
                         const receiverMarker = L.marker([receiverLat, receiverLng], {
                             icon: createMarkerIcon('receiver', index + 1),
                             riseOnHover: true,
                             title: letter.receiver || 'Receiver'
                         });
-                        
+
                         // Create popups
                         senderMarker.bindPopup(createPopupContent(letter, 'sender'));
                         receiverMarker.bindPopup(createPopupContent(letter, 'receiver'));
-                        
+
                         // Add markers to cluster group
                         clusterGroup.addLayer(senderMarker);
                         clusterGroup.addLayer(receiverMarker);
                         markers.push(senderMarker, receiverMarker);
-                        
+
                         // Create arrow between sender and receiver
-                        const arrow = window.markerUtils_createArrow 
+                        const arrow = window.markerUtils_createArrow
                             ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter')
                             : createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter');
-                        
+
                         communicationLayer.addLayer(arrow);
-                        
+
                         // Fit map to show all markers after adding each one
                         if (markers.length > 0) {
                             const group = L.featureGroup(markers);
@@ -227,7 +227,7 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
                 console.error(`Error getting coordinates for ${letter.sender_location} or ${letter.receiver_location}:`, error);
             });
     });
-    
+
     // Update communications info panel
     updateCommunicationsInfo(letters);
 }
@@ -244,14 +244,13 @@ function createPopupContent(letter, perspective) {
     const location = isSender ? letter.sender_location : letter.receiver_location;
     const otherName = isSender ? letter.receiver : letter.sender;
     const direction = isSender ? 'To' : 'From';
-    
+
     return `
         <div class="marker-popup">
             <h3>${name || 'Unknown'}</h3>
             <p><strong>Location:</strong> ${location || 'Unknown'}</p>
             <p><strong>${direction}:</strong> ${otherName || 'Unknown'}</p>
             <p><strong>Date:</strong> ${formatDate(letter.date)}</p>
-            <p><strong>Subject:</strong> ${letter.subject || 'No subject'}</p>
         </div>
     `;
 }
@@ -263,16 +262,16 @@ function createPopupContent(letter, perspective) {
 function updateDescriptionBox(content) {
     const descriptionElement = document.getElementById('diplomat-description');
     if (!descriptionElement) return;
-    
+
     if (typeof content === 'string') {
         descriptionElement.innerHTML = `<p>${content}</p>`;
         return;
     }
-    
+
     let description = content.name;
     if (content.title) description += `, ${content.title}`;
     if (content.country) description += ` (${content.country})`;
-    
+
     descriptionElement.textContent = description;
 }
 
@@ -293,13 +292,13 @@ function clearDescriptionBox() {
  */
 function fetchAllLetters(db, map) {
     console.log("Fetching all letters for communications map");
-    
+
     if (communicationLayer) {
         map.removeLayer(communicationLayer);
     }
-    
+
     communicationLayer = L.layerGroup().addTo(map);
-    
+
     const communicationsClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 20,
@@ -310,7 +309,7 @@ function fetchAllLetters(db, map) {
             let size = 'small';
             if (count > 3) size = 'medium';
             if (count > 6) size = 'large';
-            
+
             return L.divIcon({
                 html: `<div class="cluster-icon cluster-${size} cluster-mixed">${count}</div>`,
                 className: 'custom-cluster-icon',
@@ -318,9 +317,9 @@ function fetchAllLetters(db, map) {
             });
         }
     });
-    
+
     communicationLayer.addLayer(communicationsClusterGroup);
-    
+
     // Query all letters
     db.collection('communications')
         .get()
@@ -329,61 +328,61 @@ function fetchAllLetters(db, map) {
             snapshot.forEach(doc => {
                 letters.push({...doc.data(), id: doc.id});
             });
-            
+
             if (letters.length === 0) {
                 updateDescriptionBox("No letters found in the database.");
                 return;
             }
-            
+
             updateDescriptionBox("Showing all diplomatic communications");
-            
+
             const markers = [];
-            
+
             letters.forEach((letter, index) => {
                 if (!letter.senderLocation || !letter.receiverLocation) return;
-                
+
                 const senderLat = letter.senderLocation.latitude;
                 const senderLng = letter.senderLocation.longitude;
                 const receiverLat = letter.receiverLocation.latitude;
                 const receiverLng = letter.receiverLocation.longitude;
-                
+
                 // Create sender marker
                 const senderMarker = L.marker([senderLat, senderLng], {
                     icon: createMarkerIcon('sender', index + 1),
                     riseOnHover: true,
                     title: letter.sender || 'Sender'
                 });
-                
+
                 // Create receiver marker
                 const receiverMarker = L.marker([receiverLat, receiverLng], {
                     icon: createMarkerIcon('receiver', index + 1),
                     riseOnHover: true,
                     title: letter.receiver || 'Receiver'
                 });
-                
+
                 // Create popups
                 senderMarker.bindPopup(createPopupContent(letter, 'sender'));
                 receiverMarker.bindPopup(createPopupContent(letter, 'receiver'));
-                
+
                 // Add markers to cluster group
                 communicationsClusterGroup.addLayer(senderMarker);
                 communicationsClusterGroup.addLayer(receiverMarker);
                 markers.push(senderMarker, receiverMarker);
-                
+
                 // Create arrow between sender and receiver
-                const arrow = window.markerUtils_createArrow 
+                const arrow = window.markerUtils_createArrow
                     ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter')
                     : createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter');
-                
+
                 communicationLayer.addLayer(arrow);
             });
-            
+
             // Fit map to show all markers
             if (markers.length > 0) {
                 const group = L.featureGroup(markers);
                 map.fitBounds(group.getBounds().pad(0.1));
             }
-            
+
             // Update communications info panel
             updateCommunicationsInfo(letters);
         })
@@ -395,12 +394,12 @@ function fetchAllLetters(db, map) {
 
 /**
  * Fetch all letter communications (alternative to diplomat-specific communications)
- * @param {Object} db - Firestore database instance 
+ * @param {Object} db - Firestore database instance
  * @param {L.Map} map - Leaflet map instance
  */
 function fetchLetterCommunications(db, map) {
     console.log("Fetching all letter communications");
-    
+
     // Clear previous communications if any
     if (communicationLayer) {
         map.removeLayer(communicationLayer);
@@ -423,7 +422,7 @@ function fetchLetterCommunications(db, map) {
             let size = 'small';
             if (count > 3) size = 'medium';
             if (count > 6) size = 'large';
-            
+
             return L.divIcon({
                 html: `<div class="cluster-icon cluster-${size} cluster-mixed">${count}</div>`,
                 className: 'custom-cluster-icon',
@@ -438,11 +437,11 @@ function fetchLetterCommunications(db, map) {
     db.collection('communications').get()
         .then((querySnapshot) => {
             console.log(`Found ${querySnapshot.size} communications total`);
-            
+
             const communications = [];
             const communicationMarkers = [];
             const communicationMarkersArray = [];
-            
+
             // Process all communications
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
@@ -476,7 +475,7 @@ function fetchLetterCommunications(db, map) {
 
             // Process locations and convert to coordinates
             const locationPromises = [];
-            
+
             communications.forEach(comm => {
                 // Get coordinates for sender location
                 const senderPromise = getLocationCoordinates(comm.sender_location)
@@ -486,7 +485,7 @@ function fetchLetterCommunications(db, map) {
                             longitude: coords.lng
                         };
                     });
-                
+
                 // Get coordinates for receiver location
                 const receiverPromise = getLocationCoordinates(comm.receiver_location)
                     .then(coords => {
@@ -495,10 +494,10 @@ function fetchLetterCommunications(db, map) {
                             longitude: coords.lng
                         };
                     });
-                
+
                 locationPromises.push(senderPromise, receiverPromise);
             });
-            
+
             // Wait for all location conversions to complete
             Promise.all(locationPromises).then(() => {
                 // Sort communications by date
@@ -532,7 +531,7 @@ function fetchLetterCommunications(db, map) {
                     // Create popup content
                     const senderPopupContent = createCommunicationPopup(comm, 'sender');
                     senderMarker.bindPopup(senderPopupContent);
-                    
+
                     const receiverPopupContent = createCommunicationPopup(comm, 'receiver');
                     receiverMarker.bindPopup(receiverPopupContent);
 
@@ -543,10 +542,10 @@ function fetchLetterCommunications(db, map) {
                     communicationMarkersArray.push([senderMarker, receiverMarker]);
 
                     // Draw arrow between locations
-                    const arrow = window.markerUtils_createArrow 
+                    const arrow = window.markerUtils_createArrow
                         ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], comm.type)
                         : createArrow([senderLat, senderLng], [receiverLat, receiverLng], comm.type);
-                    
+
                     communicationLayer.addLayer(arrow);
                 });
 
@@ -585,7 +584,7 @@ function createCommunicationPopup(comm, perspective) {
     const location = isSender ? comm.sender_location : comm.receiver_location;
     const otherName = isSender ? comm.receiver : comm.sender;
     const direction = isSender ? 'To' : 'From';
-    
+
     let dateStr = 'Unknown Date';
     if (comm.date) {
         if (comm.date.toDate) {
@@ -597,14 +596,13 @@ function createCommunicationPopup(comm, perspective) {
             dateStr = comm.date;
         }
     }
-    
+
     return `
         <div class="marker-popup">
             <h3>${name || 'Unknown'}</h3>
             <p><strong>Location:</strong> ${location || 'Unknown'}</p>
             <p><strong>${direction}:</strong> ${otherName || 'Unknown'}</p>
             <p><strong>Date:</strong> ${dateStr}</p>
-            <p><strong>Subject:</strong> ${comm.subject || 'No subject'}</p>
         </div>
     `;
 }
@@ -616,28 +614,28 @@ function createCommunicationPopup(comm, perspective) {
 function updateAllCommunicationsInfo(communications) {
     const infoElement = document.getElementById('communications-events');
     if (!infoElement) return;
-    
+
     infoElement.innerHTML = '';
-    
+
     if (communications.length === 0) {
         infoElement.innerHTML = '<p>No communications found.</p>';
         return;
     }
-    
+
     // Sort communications by date
     communications.sort((a, b) => {
         if (!a.date) return 1;
         if (!b.date) return -1;
         return a.date.seconds - b.date.seconds;
     });
-    
+
     // Limit to most recent 20 communications
     const recentCommunications = communications.slice(0, 20);
-    
+
     recentCommunications.forEach(comm => {
         const eventItem = document.createElement('div');
         eventItem.className = 'event-item';
-        
+
         let dateStr = 'Unknown Date';
         if (comm.date) {
             if (comm.date.toDate) {
@@ -649,16 +647,15 @@ function updateAllCommunicationsInfo(communications) {
                 dateStr = comm.date;
             }
         }
-        
+
         eventItem.innerHTML = `
             <div class="event-date">${dateStr}</div>
             <div class="event-content">
                 <p><strong>From:</strong> ${comm.sender || 'Unknown'}</p>
                 <p><strong>To:</strong> ${comm.receiver || 'Unknown'}</p>
-                <p>${comm.subject || 'No subject'}</p>
             </div>
         `;
-        
+
         infoElement.appendChild(eventItem);
     });
 }
@@ -670,7 +667,7 @@ function updateAllCommunicationsInfo(communications) {
  */
 function formatDate(timestamp) {
     if (!timestamp) return 'Unknown date';
-    
+
     try {
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
         return date.toLocaleDateString('en-US', {
@@ -693,7 +690,7 @@ function formatDate(timestamp) {
 function createMarkerIcon(type, index) {
     const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
     const color = colors[index % colors.length];
-    
+
     return L.divIcon({
         html: `<div class="marker-icon marker-${type}" style="background-color: ${color};"></div>`,
         className: 'custom-marker',
@@ -711,25 +708,25 @@ function createMarkerIcon(type, index) {
  */
 function createArrow(start, end, type) {
     const arrowLayer = L.layerGroup();
-    
+
     // Create the line
     const line = L.polyline([start, end], {
         color: type === 'telegram' ? '#9b59b6' : '#e74c3c',
         weight: 2,
         opacity: 0.7
     });
-    
+
     arrowLayer.addLayer(line);
-    
+
     // Calculate the midpoint for the arrow
     const midpoint = [
         (start[0] + end[0]) / 2,
         (start[1] + end[1]) / 2
     ];
-    
+
     // Calculate the angle for the arrow
     const angle = Math.atan2(end[0] - start[0], end[1] - start[1]) * 180 / Math.PI;
-    
+
     // Create a marker for the arrow
     const arrowMarker = L.marker(midpoint, {
         icon: L.divIcon({
@@ -739,9 +736,9 @@ function createArrow(start, end, type) {
             iconAnchor: [10, 10]
         })
     });
-    
+
     arrowLayer.addLayer(arrowMarker);
-    
+
     return arrowLayer;
 }
 
@@ -752,16 +749,16 @@ function createArrow(start, end, type) {
 function updateCommunicationsInfo(letters) {
     const infoElement = document.getElementById('communications-events');
     if (!infoElement) return;
-    
+
     infoElement.innerHTML = '';
-    
+
     console.log("Letters to display in communications panel:", letters);
-    
+
     if (letters.length === 0) {
         infoElement.innerHTML = '<p>No communications found for this diplomat.</p>';
         return;
     }
-    
+
     // Sort letters by date
     letters.sort((a, b) => {
         if (!a.date) return 1;
@@ -771,15 +768,15 @@ function updateCommunicationsInfo(letters) {
         }
         return a.date.seconds - b.date.seconds;
     });
-    
+
     // Log the diplomat ID we're using for comparison
     const diplomatId = document.getElementById('diplomat-selector').value;
     console.log("Selected diplomat ID for comparison:", diplomatId);
-    
+
     letters.forEach((letter, index) => {
         const eventItem = document.createElement('div');
         eventItem.className = 'event-item';
-        
+
         // Format date directly here instead of using formatDate function
         let dateStr = 'Unknown Date';
         if (letter.date) {
@@ -792,29 +789,28 @@ function updateCommunicationsInfo(letters) {
                 dateStr = letter.date;
             }
         }
-        
+
         console.log(`Letter ${index} - date:`, letter.date, "formatted as:", dateStr);
-        
+
         // Check if this diplomat is the sender or receiver
         const senderId = letter.sender ? letter.sender.replace(/\s+/g, '_').toLowerCase() : '';
         const receiverId = letter.receiver ? letter.receiver.replace(/\s+/g, '_').toLowerCase() : '';
-        
+
         console.log(`Letter ${index} - sender: "${letter.sender}" (ID: ${senderId}), receiver: "${letter.receiver}" (ID: ${receiverId})`);
-        
+
         const isSender = senderId === diplomatId;
         const direction = isSender ? 'To' : 'From';
         const otherParty = isSender ? letter.receiver : letter.sender;
-        
+
         console.log(`Letter ${index} - isSender: ${isSender}, direction: ${direction}, otherParty: ${otherParty}`);
-        
+
         eventItem.innerHTML = `
             <div class="event-date">${dateStr}</div>
             <div class="event-content">
                 <p><strong>${direction}:</strong> ${otherParty || 'Unknown'}</p>
-                <p>${letter.subject || 'No subject'}</p>
             </div>
         `;
-        
+
         infoElement.appendChild(eventItem);
     });
 }
@@ -829,12 +825,12 @@ function getLocationCoordinates(locationName) {
     if (!window.locationCoordinates) {
         window.locationCoordinates = {};
     }
-    
+
     // Return from cache if available
     if (window.locationCoordinates[locationName]) {
         return Promise.resolve(window.locationCoordinates[locationName]);
     }
-    
+
     // Use a geocoding service to get coordinates
     // For this example, we'll use a simple mapping of common locations
     const locationMap = {
@@ -854,14 +850,14 @@ function getLocationCoordinates(locationName) {
         'Syros': { lat: 37.4500, lng: 24.9167 },
         'Bologna': { lat: 44.4949, lng: 11.3426 }
     };
-    
+
     // Check if we have the location in our map
     if (locationMap[locationName]) {
         // Cache the result
         window.locationCoordinates[locationName] = locationMap[locationName];
         return Promise.resolve(locationMap[locationName]);
     }
-    
+
     // If not in our map, return a default location and log a warning
     console.warn(`Location not found in map: ${locationName}. Using default coordinates.`);
     const defaultCoords = { lat: 41.0082, lng: 28.9784 }; // Istanbul as default
