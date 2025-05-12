@@ -973,11 +973,22 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Team Container */
 .team-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
     margin: 30px auto 0;
-    max-width: 1200px; /* Limit width but still allow multiple columns */
+    max-width: 1200px; /* Limit width */
+}
+
+/* Team Row */
+.team-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .team-row {
+        flex-direction: column;
+    }
 }
 
 /* Supervisor Container */
@@ -998,6 +1009,8 @@ h1, h2, h3, h4, h5, h6 {
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    flex: 1;
+    width: 100%;
 }
 
 .team-member-card:hover {
