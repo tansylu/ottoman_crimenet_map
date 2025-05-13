@@ -1077,7 +1077,12 @@ h1, h2, h3, h4, h5, h6 {
     color: #666;
     margin-top: 8px;
     text-align: center;
-    font-style: italic;
+    font-style: normal; /* Normal text style by default */
+}
+
+/* Italicize only book/work titles within captions */
+.image-caption em {
+    font-style: italic; /* Italicize text within <em> tags */
 }
 
 /* Side by side images */
