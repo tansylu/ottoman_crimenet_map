@@ -62,40 +62,90 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Her belge için bir tablo satırı oluştur
+    // Tüm verileri bir diziye topla
+    const criminals = [];
+
     snapshot.forEach((doc) => {
       const data = doc.data();
       console.log(`Processing criminal: ${doc.id}`, data);
 
-      // Yeni bir tablo satırı oluştur
-      const row = document.createElement('tr');
-
       // Tarih formatını düzenle
       let birthDate = 'Unknown';
       if (data.birthdate) {
-        const date = data.birthdate;
-        if (date.year) {
-          birthDate = `${date.year}`;
-          if (date.month) birthDate += `-${date.month}`;
-          if (date.day) birthDate += `-${date.day}`;
+        // Nesne formatında tarih kontrolü (Firebase Timestamp veya özel tarih nesnesi)
+        if (typeof data.birthdate === 'object') {
+          // Firebase Timestamp kontrolü
+          if (data.birthdate.toDate && typeof data.birthdate.toDate === 'function') {
+            const date = data.birthdate.toDate();
+            birthDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+          }
+          // Özel tarih nesnesi kontrolü (year, month, day alanları)
+          else if (data.birthdate.year) {
+            birthDate = `${data.birthdate.year}`;
+            if (data.birthdate.month) birthDate += `-${data.birthdate.month}`;
+            if (data.birthdate.day) birthDate += `-${data.birthdate.day}`;
+          }
+        }
+        // String formatında tarih kontrolü
+        else if (typeof data.birthdate === 'string') {
+          birthDate = data.birthdate;
+        }
+        // Sayısal değer kontrolü (örneğin 1834)
+        else if (typeof data.birthdate === 'number') {
+          birthDate = data.birthdate.toString();
         }
       }
 
+      // Diğer alanları hazırla
+      const name = data.name || doc.id.replace('criminal_', '');
+      const birthplace = data.birthplace || 'Unknown';
+      const nationality = data.nation || data.nationality || 'Unknown';
+      const occupation = data.prof || data.occupation || 'Unknown';
+      const placeOfArrest = data.placeOfArrest || data.placeofprof || 'Unknown';
+
+      // "Unknown" sayısını hesapla
+      let unknownCount = 0;
+      if (birthDate === 'Unknown') unknownCount++;
+      if (birthplace === 'Unknown') unknownCount++;
+      if (nationality === 'Unknown') unknownCount++;
+      if (occupation === 'Unknown') unknownCount++;
+      if (placeOfArrest === 'Unknown') unknownCount++;
+
+      // Suçlu bilgilerini diziye ekle
+      criminals.push({
+        id: doc.id,
+        name: name,
+        birthDate: birthDate,
+        birthplace: birthplace,
+        nationality: nationality,
+        occupation: occupation,
+        placeOfArrest: placeOfArrest,
+        unknownCount: unknownCount
+      });
+    });
+
+    // "Unknown" sayısına göre sırala (az olandan çok olana)
+    criminals.sort((a, b) => a.unknownCount - b.unknownCount);
+
+    // Sıralanmış verileri tabloya ekle
+    criminals.forEach(criminal => {
+      const row = document.createElement('tr');
+
       // Satır içeriğini oluştur
       row.innerHTML = `
-        <td>${data.name || doc.id.replace('criminal_', '')}</td>
-        <td>${birthDate}</td>
-        <td>${data.birthplace || 'Unknown'}</td>
-        <td>${data.nation || data.nationality || 'Unknown'}</td>
-        <td>${data.prof || data.occupation || 'Unknown'}</td>
-        <td>${data.placeOfArrest || data.placeofprof || 'Unknown'}</td>
+        <td>${criminal.name}</td>
+        <td>${criminal.birthDate}</td>
+        <td>${criminal.birthplace}</td>
+        <td>${criminal.nationality}</td>
+        <td>${criminal.occupation}</td>
+        <td>${criminal.placeOfArrest}</td>
       `;
 
       // Satırı tabloya ekle
       tableBody.appendChild(row);
     });
 
-    console.log("Criminal records table populated successfully");
+    console.log("Criminal records table populated successfully and sorted by unknown count");
   }).catch((error) => {
     console.error("Error getting documents: ", error);
     tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">Error loading criminal records: ${error.message}</td></tr>`;
