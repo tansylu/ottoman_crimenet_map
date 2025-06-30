@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Clickable Map</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
+img {
+    display: block;
+    max-width: 100%;
+}
+#info-box {
+    position: absolute;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    border: 1px solid #555;
+    display: none;
+    pointer-events: none;
+    font-size: 14px;
+    max-width: 250px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,.25);
+}
+</style>
+</head>
+<body>
+<img src="Ekran.png" usemap="#image-map" alt="Map">
+
+<map name="image-map">
+    <area alt="red 2" title="red 2" href="#" coords="68,203,5" shape="circle">
+    <area alt="red 6" title="red 6" href="#" coords="207,254,5" shape="circle">
+    <area alt="green 2" title="green 2" href="#" coords="159,323,5" shape="circle">
+    <area alt="green 3" title="green 3" href="#" coords="218,247,5" shape="circle">
+    <area alt="green 5" title="green 5" href="#" coords="226,358,5" shape="circle">
+    <area alt="red 1" title="red 1" href="#" coords="319,301,5" shape="circle">
+    <area alt="red 3" title="red 3" href="#" coords="317,320,5" shape="circle">
+    <area alt="green 6" title="green 6" href="#" coords="399,293,5" shape="circle">
+    <area alt="red 4" title="red 4" href="#" coords="420,247,5" shape="circle">
+    <area alt="green 1" title="green 1" href="#" coords="429,254,5" shape="circle">
+    <area alt="red 7" title="red 7" href="#" coords="455,229,5" shape="circle">
+    <area alt="red 8" title="red 8" href="#" coords="542,258,5" shape="circle">
+    <area alt="green 4" title="green 4" href="#" coords="494,400,5" shape="circle">
+    <area alt="red 5" title="red 5" href="#" coords="532,384,5" shape="circle">
+</map>
+
+<div id="info-box"></div>
+
+<script>
+const data = {
+  "red 2": "Giuseppe Lopetz (lives with his family, near the Court of Galata) (Rue 198: Mahkeme- Galata)",
+  "red 6": "Cesare Venzi – Andonaki Draganikos (they live close to Tekke) (Rue 1: Grand Rue de Pera)",
+  "green 2": "Ludovico Boschi – Gaetano Manzo – Tommasso Facchini (Bülbül Café) (Rue 157: Bülbül)",
+  "green 3": "Ludovico Boschi – Gaetano Manzo – Cesare Venzi – Andonaki Draganikos (Café Tekke) (Rue 1: Grand Rue de Pera)",
+  "green 5": "Clitzi Cole – Gaetano Manzo – Francisco Petris (English Casino across the Sardinian hospital)",
+  "red 1": "Giuseppe Civicoff (Hotel de France next to the French College, close to Petits de Champs) (Rue 66: Çukurcuma)",
+  "red 3": "Roberto Diamanti (works at a shop) (Rue 23: Yeniçarşı – Pera)",
+  "green 6": "Ludovico Bosschi – Andonaki Draganikos (Theatre Café close to Naum Theatre and opposite to Hungarian Casino) (Rue 18: Theatre",
+  "red 4": "Margarita – Francisco Petris (they live here) (Rue 200: Kalyoncu Kulluk",
+  "green 1": "Gaetano Manzo – Clitzi Cole (Café Charalanpas) (Rue 200: Kalyoncu Kulluk)",
+  "red 7": "Cesare Venzi – Andonaki Draganikos (they work at a shop) (Rue 206: Tepebaşı)",
+  "red 8": "Giovanni Romano (works at Button Maker Factory owned by Catherin Perin) (Rue 140: Yenişehir - Pera) ",
+  "green 4": "Ludovico Boschi – Gaetano Manzo – Cesare Venzi – Andonaki Draganikos (Liquor Factory nearby Taksim Fountain) (Rue 4: Taksim)",
+  "red 5": "Gaetano Manzo (works at Café Prado across the Selimiye Barracks) (Rue 4: Taksim) "
+};
+
+const infoBox = document.getElementById("info-box");
+
+document.querySelectorAll("area").forEach(area => {
+  area.addEventListener("mouseenter", (e) => {
+    const title = area.getAttribute("title");
+    infoBox.innerHTML = data[title] || "No information available.";
+    infoBox.style.left = e.pageX + 15 + "px";
+    infoBox.style.top = e.pageY + 15 + "px";
+    infoBox.style.display = "block";
+  });
+  area.addEventListener("mouseleave", () => {
+    infoBox.style.display = "none";
+  });
+});
+</script>
+</body>
+</html>
