@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="/static/styles/criminals_map.css">
     <link rel="stylesheet" href="/static/styles/criminal_journeys_landing.css">
     <link rel="stylesheet" href="/static/styles/section_spacing.css">
-    <link rel="stylesheet" href="/static/styles/beyoglu_offline_map.css">
 </head>
 <body>
     <!-- Header with navigation -->
@@ -195,13 +194,18 @@
             </div>
             <p>Visualizations of criminal networks and their movements during the Crimean War</p>
 
+            <!-- Beyoglu Map Subsection -->
+            <div class="section-subtitle-wrapper">
+                <h3>Beyoglu Map</h3>
+                {% include 'beyoglu_interactive_map.html' %}
+            </div>
             <!-- Network Map Subsection -->
             <div class="section-subtitle-wrapper">
-                <h3>Network Map</h3>
+                <h3>Forgers network Map</h3>
             </div>
-            <p>Visual network and relationship map of the forgers</p>
-            <div class="map-container" style="width: 90%; max-width: 1200px; margin: 0 auto; margin-bottom: 30px;">
-                <iframe src="/network-relation-map" style="width: 100%; height: 500px; border: none; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></iframe>
+           
+            <div class="graphcommons-container">
+                {% include 'graphcommons.html' %}
             </div>
 
             <div style="clear: both; height: 20px;"></div>
@@ -217,11 +221,8 @@
                 {% include 'criminal_journeys.html' %}
             </div>
 
-            <!-- Beyoglu Map Subsection -->
-            <div class="section-subtitle-wrapper">
-                <h3>Beyoglu Map</h3>
-            </div>
-            {% include 'beyoglu_map_content_new.html' %}
+          
+            
         </div>
     </section>
 
@@ -309,7 +310,7 @@
                 <div class="team-row">
                     <div class="team-member-card">
                         <div class="member-photo">
-                            <img src="/static/images/placeholder-profile.jpg" alt="Zeynep Zilan Turunç">
+                            <img src="/static/images/zilan.jpeg" alt="Zeynep Zilan Turunç">
                         </div>
                         <div class="member-info">
                             <h4 class="member-name">Zeynep Zilan Turunç</h4>
@@ -320,7 +321,7 @@
 
                     <div class="team-member-card">
                         <div class="member-photo">  
-                            <img src="/static/images/placeholder-profile.jpg" alt="Tansylu Akhmetova">
+                            <img src="/static/images/tansu.png" alt="Tansylu Akhmetova">
                         </div>
                         <div class="member-info">
                             <h4 class="member-name">Tansylu Akhmetova</h4>
@@ -333,7 +334,7 @@
                 <div class="team-row">
                     <div class="team-member-card">
                         <div class="member-photo">
-                            <img src="/static/images/placeholder-profile.jpg" alt="Hakan Mert Özcan">
+                            <img src="/static/images/hakan.png" alt="Hakan Mert Özcan">
                         </div>
                         <div class="member-info">
                             <h4 class="member-name">Hakan Mert Özcan</h4>
@@ -344,7 +345,7 @@
 
                     <div class="team-member-card">
                         <div class="member-photo">
-                            <img src="/static/images/placeholder-profile.jpg" alt="Furkan Emre Babadağ">
+                            <img src="/static/images/furkan.png" alt="Furkan Emre Babadağ">
                         </div>
                         <div class="member-info">
                             <h4 class="member-name">Furkan Emre Babadağ</h4>
@@ -400,6 +401,7 @@
     <script src="/static/js/letterCommunications.js"></script>
     <script src="/static/js/mapFullscreen.js"></script>
     <script src="/static/js/criminal-records-standalone.js"></script>
+    <script src="/static/js/diplomatGallery.js"></script>
     <script src="/static/js/main_landing.js"></script>
 </body>
 </html>

@@ -1,5 +1,28 @@
 /* Network Relation Map Styles */
 
+#network {
+    width: 100%;
+    height: 800px; /* Increased from default to make it larger */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+/* Override map-container height for network visualization */
+.section-container .map-container {
+    height: 800px !important; /* Override the default 500px height */
+    min-height: 800px;
+    width: 100% !important;
+}
+
+/* Ensure the network element fills the entire container */
+.section-container .map-container #network {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 800px;
+}
+
 .network-container {
     width: 100%;
     height: 600px;

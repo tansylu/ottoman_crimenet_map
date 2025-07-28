@@ -30,5 +30,11 @@ def network_relation_map():
     firebase_config = get_firebase_config()
     return render_template('network_relation_map.html', firebase_config=firebase_config)
 
+@app.route('/graphcommons')
+def graphcommons():
+    """Render the GraphCommons visualization"""
+    firebase_config = get_firebase_config()
+    return render_template('graphcommons.html', firebase_config=firebase_config)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5005)

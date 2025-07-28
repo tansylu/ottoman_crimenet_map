@@ -9,6 +9,79 @@ body {
     color: var(--neutral-dark);
 }
 
+/* Graphcommons container styling */
+.graphcommons-container {
+    width: 100%;
+    height: 600px;
+    margin: 20px 0;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background-color: var(--neutral-light);
+    position: relative;
+}
+
+.graphcommons-container #network {
+    width: 100%;
+    height: 100%;
+    background-color: var(--neutral-light);
+}
+
+.graphcommons-container #info-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--accent);
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-width: 300px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    backdrop-filter: blur(5px);
+}
+
+.graphcommons-container #info-box strong {
+    color: var(--primary);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Playfair Display', serif;
+}
+
+/* Responsive design for graphcommons */
+@media (max-width: 768px) {
+    .graphcommons-container {
+        height: 400px;
+        margin: 15px 0;
+    }
+    
+    .graphcommons-container #info-box {
+        max-width: 250px;
+        font-size: 13px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .graphcommons-container {
+        height: 350px;
+        margin: 10px 0;
+    }
+    
+    .graphcommons-container #info-box {
+        max-width: 200px;
+        font-size: 12px;
+        padding: 10px;
+        top: 5px;
+        right: 5px;
+    }
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
@@ -776,9 +849,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .section-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 40px; /* Padding on both sides for better readability */
+    padding: 0 20px; /* Reduced padding to allow more content width */
     box-sizing: border-box;
 }
 
@@ -844,7 +917,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section p {
-    max-width: 1000px; /* Limit paragraph width for better readability */
+    max-width: 1200px; /* Increased paragraph width for better content display */
     margin-left: auto;
     margin-right: auto;
     padding: 15px 20px;
@@ -865,6 +938,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: 0;
     margin-right: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Ensure map content doesn't overflow */
 }
 
 /* Gallery Container */
@@ -884,7 +958,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: 30px auto; /* Center the table */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    max-height: 400px; /* Limit height to show about 5 rows */
+    max-height: 600px; /* Increased height to show more rows */
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
