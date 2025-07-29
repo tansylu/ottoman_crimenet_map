@@ -807,7 +807,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Hero Section */
 .hero-section {
     height: 60vh; /* Reduced from 100vh to 60vh */
-    background-image: linear-gradient(rgba(26, 42, 64, 0.9), rgba(26, 42, 64, 0.7)), url('/static/images/hero-bg.jpg');
+    background-image: linear-gradient(rgba(26, 42, 64, 0.9), rgba(26, 42, 64, 0.7)), url('/static/images/banner.jpeg');
     background-size: cover;
     background-position: center;
     display: flex;
