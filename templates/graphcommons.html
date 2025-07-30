@@ -2,8 +2,7 @@
   <div id="network" style="width: 90%; height: 900px; border: 1px solid #ccc;"></div>
 </div>
 
-<div id="info-box" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 9999; max-width: 300px; pointer-events: none;"></div>
-
+<div id="info-box" style="display: none; position: fixed; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 9999; max-width: 300px; pointer-events: none;"></div>
 
 <!-- vis-network JS CDN -->
 <script src="https://unpkg.com/vis-network@9/dist/vis-network.min.js"></script>
@@ -83,6 +82,7 @@ network.on("click", function (params) {
     
     if (node) {
       const infoBox = document.getElementById('info-box');
+      const networkContainer = document.getElementById('network');
       console.log("Info box element:", infoBox);
       
       infoBox.innerHTML = `
@@ -90,17 +90,51 @@ network.on("click", function (params) {
         Place of Forgery: ${node.description || "No information available"}
       `;
       infoBox.style.display = "block";
-      infoBox.style.position = "absolute";
-      infoBox.style.zIndex = "9999";
       
-      // Position next to the click
-      infoBox.style.left = (params.pointer.DOM.x + 10) + "px";
-      infoBox.style.top = (params.pointer.DOM.y - 50) + "px";
+      // Get the network container's position relative to viewport
+      const containerRect = networkContainer.getBoundingClientRect();
+      
+      // Calculate position relative to the click point, accounting for scroll
+      const x = params.pointer.DOM.x + 10;
+      const y = params.pointer.DOM.y - 50;
+      
+      // Ensure the infobox stays within the viewport bounds
+      const maxX = window.innerWidth - infoBox.offsetWidth - 10;
+      const maxY = window.innerHeight - infoBox.offsetHeight - 10;
+      
+      infoBox.style.left = Math.min(Math.max(10, x), maxX) + "px";
+      infoBox.style.top = Math.min(Math.max(10, y), maxY) + "px";
       
       console.log("Info box should be visible now");
     }
   } else {
     document.getElementById('info-box').style.display = "none"; 
+  }
+});
+
+// Hide infobox when clicking outside of nodes
+network.on("blurNode", function (params) {
+  document.getElementById('info-box').style.display = "none";
+});
+
+// Hide infobox when scrolling
+window.addEventListener('scroll', function() {
+  document.getElementById('info-box').style.display = "none";
+});
+
+// Hide infobox when resizing window
+window.addEventListener('resize', function() {
+  document.getElementById('info-box').style.display = "none";
+});
+
+// Hide infobox when clicking anywhere else on the page
+document.addEventListener('click', function(event) {
+  const infoBox = document.getElementById('info-box');
+  const networkContainer = document.getElementById('network');
+  
+  // Check if click is outside the network container
+  if (!networkContainer.contains(event.target)) {
+    infoBox.style.display = "none";
   }
 });
 </script>
