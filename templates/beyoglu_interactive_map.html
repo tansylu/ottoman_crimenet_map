@@ -17,15 +17,14 @@
             <span id="opacity-value">80%</span>
           </div>
 
-          <div class="movement-controls">
-            <h4>Map Movement (100m)</h4>
-            <div class="movement-buttons">
-              <button id="move-up" class="movement-btn" title="Move Up 100m">↑</button>
-              <div class="horizontal-controls">
-                <button id="move-left" class="movement-btn" title="Move Left 100m">←</button>
-                <button id="move-right" class="movement-btn" title="Move Right 100m">→</button>
-              </div>
-              <button id="move-down" class="movement-btn" title="Move Down 100m">↓</button>
+          <div class="zoom-controls">
+            <h4>Zoom Controls</h4>
+            <div class="zoom-buttons">
+              <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
+              <button id="zoom-out" class="zoom-btn" title="Zoom Out">−</button>
+            </div>
+            <div class="zoom-reset">
+              <button id="reset-zoom" class="reset-btn" title="Reset Zoom">Reset</button>
             </div>
           </div>
 
@@ -37,129 +36,136 @@
         </div>
         
         <div class="legend-content">
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>1. Giuseppe Lopetz</h4>
-              <p>Lives with his family, near the Court of Galata</p>
-              <span class="location-address">Rue 198: Mahkeme- Galata</span>
+          <div class="legend-section">
+            <h4 class="section-title">Where Did They Live/Work? (The green circles on the map)</h4>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>1: Giuseppe Civicoff</h4>
+                <p>Hotel de France next to the French College, close to Petits de Champs</p>
+                <span class="location-address">(Rue (street-cadde) 66: Çukurcuma)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>2: Giuseppe Lopetz</h4>
+                <p>lives with his family, near the Court of Galata</p>
+                <span class="location-address">(Rue 198: Mahkeme- Galata)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>3: Roberto Diamanti</h4>
+                <p>works at a shop</p>
+                <span class="location-address">(Rue 23: Yeniçarşı – Pera)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>4: Margarita – Francisco Petris</h4>
+                <p>they live here</p>
+                <span class="location-address">(Rue 200: Kalyoncu Kulluk)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>5: Gaetano Manzo</h4>
+                <p>works at Café Prado across the Selimiye Barracks</p>
+                <span class="location-address">(Rue 4: Taksim)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>6: Cesare Venzi – Andonaki Draganikos</h4>
+                <p>they live close to Tekke</p>
+                <span class="location-address">(Rue 1: Grand Rue de Pera)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>7: Cesare Venzi – Andonaki Draganikos</h4>
+                <p>they work at a shop</p>
+                <span class="location-address">(Rue 206: Tepebaşı)</span>
+              </div>
+            </div>
+            
+            <div class="location-item green">
+              <div class="location-marker green"></div>
+              <div class="location-info">
+                <h4>8: Giovanni Romano</h4>
+                <p>works at Button Maker Factory owned by Catherin Perin</p>
+                <span class="location-address">(Rue 140: Yenişehir - Pera)</span>
+              </div>
             </div>
           </div>
           
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>2. Cesare Venzi & Andonaki Draganikos</h4>
-              <p>They live close to Tekke</p>
-              <span class="location-address">Rue 1: Grand Rue de Pera</span>
+          <div class="legend-section">
+            <h4 class="section-title">Where Did They Meet? (The purple circles on the map)</h4>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>1: Gaetano Manzo – Clitzi Cole</h4>
+                <p>Café Charalanpas</p>
+                <span class="location-address">(Rue 200: Kalyoncu Kulluk)</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>3. Bülbül Café</h4>
-              <p>Ludovico Boschi, Gaetano Manzo, Tommasso Facchini</p>
-              <span class="location-address">Rue 157: Bülbül</span>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>2: Ludovico Boschi – Gaetano Manzo – Tommasso Facchini</h4>
+                <p>Bülbül Café</p>
+                <span class="location-address">(Rue 157: Bülbül)</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>4. Café Tekke</h4>
-              <p>Ludovico Boschi, Gaetano Manzo, Cesare Venzi, Andonaki Draganikos</p>
-              <span class="location-address">Rue 1: Grand Rue de Pera</span>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>3: Ludovico Boschi – Gaetano Manzo – Cesare Venzi – Andonaki Draganikos</h4>
+                <p>Café Tekke</p>
+                <span class="location-address">(Rue 1: Grand Rue de Pera)</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>5. English Casino</h4>
-              <p>Clitzi Cole, Gaetano Manzo, Francisco Petris</p>
-              <span class="location-address">Across the Sardinian hospital</span>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>4: Ludovico Boschi – Gaetano Manzo – Cesare Venzi – Andonaki Draganikos</h4>
+                <p>Liquor Factory nearby Taksim Fountain</p>
+                <span class="location-address">(Rue 4: Taksim)</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>6. Giuseppe Civicoff</h4>
-              <p>Hotel de France next to the French College, close to Petits de Champs</p>
-              <span class="location-address">Rue 66: Çukurcuma</span>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>5: Clitzi Cole – Gaetano Manzo – Francisco Petris</h4>
+                <p>English Casino across the Sardinian hospital</p>
+              </div>
             </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>7. Roberto Diamanti</h4>
-              <p>Works at a shop</p>
-              <span class="location-address">Rue 23: Yeniçarşı – Pera</span>
-            </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>8. Theatre Café</h4>
-              <p>Ludovico Bosschi, Andonaki Draganikos</p>
-              <span class="location-address">Close to Naum Theatre and opposite to Hungarian Casino, Rue 18: Theatre</span>
-            </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>9. Margarita & Francisco Petris</h4>
-              <p>They live here</p>
-              <span class="location-address">Rue 200: Kalyoncu Kulluk</span>
-            </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>10. Café Charalanpas</h4>
-              <p>Gaetano Manzo, Clitzi Cole</p>
-              <span class="location-address">Rue 200: Kalyoncu Kulluk</span>
-            </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>11. Cesare Venzi & Andonaki Draganikos</h4>
-              <p>They work at a shop</p>
-              <span class="location-address">Rue 206: Tepebaşı</span>
-            </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>12. Giovanni Romano</h4>
-              <p>Works at Button Maker Factory owned by Catherin Perin</p>
-              <span class="location-address">Rue 140: Yenişehir - Pera</span>
-            </div>
-          </div>
-          
-          <div class="location-item green">
-            <div class="location-marker green"></div>
-            <div class="location-info">
-              <h4>13. Liquor Factory</h4>
-              <p>Ludovico Boschi, Gaetano Manzo, Cesare Venzi, Andonaki Draganikos</p>
-              <span class="location-address">Nearby Taksim Fountain, Rue 4: Taksim</span>
-            </div>
-          </div>
-          
-          <div class="location-item red">
-            <div class="location-marker red"></div>
-            <div class="location-info">
-              <h4>14. Gaetano Manzo</h4>
-              <p>Works at Café Prado across the Selimiye Barracks</p>
-              <span class="location-address">Rue 4: Taksim</span>
+            
+            <div class="location-item purple">
+              <div class="location-marker purple"></div>
+              <div class="location-info">
+                <h4>6: Ludovico Bosschi – Andonaki Draganikos</h4>
+                <p>Theatre Café close to Naum Theatre and opposite to Hungarian Casino</p>
+                <span class="location-address">(Rue 18: Theatre)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -267,8 +273,9 @@
   border-radius: 5px;
   max-width: 100%;
   max-height: 100%;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   overflow: visible;
+  transform-origin: center center;
 }
 
 .opacity-control {
@@ -287,7 +294,7 @@
   font-size: 0.9rem;
 }
 
-.movement-controls {
+.zoom-controls {
   position: absolute;
   bottom: 10px;
   right: 10px;
@@ -299,26 +306,22 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-.movement-controls h4 {
+.zoom-controls h4 {
   margin: 0 0 10px 0;
   font-size: 0.9rem;
   color: var(--primary);
   text-align: center;
 }
 
-.movement-buttons {
+.zoom-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  margin-bottom: 10px;
 }
 
-.horizontal-controls {
-  display: flex;
-  gap: 5px;
-}
-
-.movement-btn {
+.zoom-btn {
   width: 40px;
   height: 40px;
   border: 2px solid var(--accent);
@@ -334,13 +337,40 @@
   transition: all 0.2s ease;
 }
 
-.movement-btn:hover {
+.zoom-btn:hover {
   background: var(--accent);
   color: white;
   transform: scale(1.1);
 }
 
-.movement-btn:active {
+.zoom-btn:active {
+  transform: scale(0.95);
+}
+
+.zoom-reset {
+  text-align: center;
+}
+
+.reset-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--accent);
+  background: white;
+  color: var(--accent);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.05);
+}
+
+.reset-btn:active {
   transform: scale(0.95);
 }
 
@@ -456,6 +486,10 @@
 }
 
 .location-item.green {
+  border-left-color: #00EFA8;
+}
+
+.location-item.purple {
   border-left-color: #BA7CFF;
 }
 
@@ -470,11 +504,11 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.location-marker.red {
+.location-marker.green {
   background-color: #00EFA8;
 }
 
-.location-marker.green {
+.location-marker.purple {
   background-color: #BA7CFF;
 }
 
@@ -499,11 +533,37 @@
   line-height: 1.4;
 }
 
+.legend-section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  color: var(--primary);
+  font-size: 1rem;
+  margin: 0 0 15px 0;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+}
+
 .location-address {
   font-family: 'Montserrat', sans-serif;
   color: var(--accent);
   font-size: 0.8rem;
   font-weight: 500;
+  font-style: italic;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.location-note {
+  font-family: 'Montserrat', sans-serif;
+  color: #666;
+  font-size: 0.75rem;
   font-style: italic;
   display: block;
 }

@@ -364,10 +364,7 @@ class BeyogluMapOverlay {
     setupAlignmentControls() {
         const zoomInBtn = document.getElementById('zoom-in');
         const zoomOutBtn = document.getElementById('zoom-out');
-        const resetBtn = document.getElementById('reset-view');
-        const rotateLeftBtn = document.getElementById('rotate-left');
-        const rotateRightBtn = document.getElementById('rotate-right');
-        const rotationInput = document.getElementById('rotation-input');
+        const resetBtn = document.getElementById('reset-zoom');
         
         if (!this.modernMap) {
             console.warn('Modern map not initialized');
@@ -376,166 +373,81 @@ class BeyogluMapOverlay {
         
         if (zoomInBtn) {
             zoomInBtn.addEventListener('click', () => {
-                this.zoomMap('in');
+                this.zoomBoth('in');
                 console.log('Zoomed in');
             });
         }
         
         if (zoomOutBtn) {
             zoomOutBtn.addEventListener('click', () => {
-                this.zoomMap('out');
+                this.zoomBoth('out');
                 console.log('Zoomed out');
             });
         }
         
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                this.resetMapView();
-                console.log('Reset view');
+                this.resetZoom();
+                console.log('Reset zoom');
             });
         }
         
-        if (rotateLeftBtn) {
-            rotateLeftBtn.addEventListener('click', () => {
-                this.rotateMap(-45);
-                console.log('Rotated left');
-            });
-        }
-        
-        if (rotateRightBtn) {
-            rotateRightBtn.addEventListener('click', () => {
-                this.rotateMap(45);
-                console.log('Rotated right');
-            });
-        }
-        
-        if (rotationInput) {
-            rotationInput.addEventListener('input', (e) => {
-                const rotation = parseFloat(e.target.value) || 0;
-                this.rotateMapTo(rotation);
-                console.log('Rotated to:', rotation);
-            });
-        }
-        
-        // Setup movement controls
-        this.setupMovementControls();
-        
-        console.log('Alignment controls initialized');
+        console.log('Zoom controls initialized');
     }
     
-    setupMovementControls() {
-        const moveUpBtn = document.getElementById('move-up');
-        const moveDownBtn = document.getElementById('move-down');
-        const moveLeftBtn = document.getElementById('move-left');
-        const moveRightBtn = document.getElementById('move-right');
+    zoomBoth(direction) {
+        if (!this.modernMap || !this.imageElement) return;
         
-        if (!this.modernMap) {
-            console.warn('Modern map not initialized');
+        const currentZoom = this.modernMap.getZoom();
+        const currentCenter = this.modernMap.getCenter();
+        
+        let newZoom;
+        if (direction === 'in') {
+            newZoom = Math.min(currentZoom + 1, 18); // Limit max zoom
+        } else if (direction === 'out') {
+            newZoom = Math.max(currentZoom - 1, 1); // Limit min zoom
+        } else {
             return;
         }
         
-        if (moveUpBtn) {
-            moveUpBtn.addEventListener('click', () => {
-                this.moveMap('up');
-                console.log('Moved up 50m');
-            });
-        }
+        // Zoom the modern map
+        this.modernMap.setView(currentCenter, newZoom, { animate: false });
         
-        if (moveDownBtn) {
-            moveDownBtn.addEventListener('click', () => {
-                this.moveMap('down');
-                console.log('Moved down 50m');
-            });
-        }
+        // Calculate zoom factor for the historical image
+        const zoomFactor = Math.pow(2, newZoom - currentZoom);
         
-        if (moveLeftBtn) {
-            moveLeftBtn.addEventListener('click', () => {
-                this.moveMap('left');
-                console.log('Moved left 50m');
-            });
-        }
+        // Apply zoom to the historical image
+        const currentTransform = this.imageElement.style.transform || '';
+        const currentScale = this.getCurrentImageScale();
+        const newScale = currentScale * zoomFactor;
         
-        if (moveRightBtn) {
-            moveRightBtn.addEventListener('click', () => {
-                this.moveMap('right');
-                console.log('Moved right 50m');
-            });
-        }
+        // Apply the new scale while preserving any existing rotation
+        this.imageElement.style.transform = `scale(${newScale})`;
         
-        console.log('Movement controls initialized');
+        console.log(`Zoomed ${direction}: Map zoom ${newZoom}, Image scale ${newScale}`);
     }
     
-    moveMap(direction) {
-        if (!this.modernMap) return;
-        
-        const currentCenter = this.modernMap.getCenter();
-        const currentLat = currentCenter.lat;
-        const currentLng = currentCenter.lng;
-        
-        // Convert 50 meters to degrees (approximate)
-        // At this latitude, 1 degree of latitude ≈ 111,000 meters
-        // 1 degree of longitude ≈ 111,000 * cos(latitude) meters
-        const latOffset = 50 / 111000; // 50 meters in degrees of latitude
-        const lngOffset = 50 / (111000 * Math.cos(currentLat * Math.PI / 180)); // 50 meters in degrees of longitude
-        
-        let newLat = currentLat;
-        let newLng = currentLng;
-        
-        switch (direction) {
-            case 'up':
-                newLat = currentLat + latOffset;
-                break;
-            case 'down':
-                newLat = currentLat - latOffset;
-                break;
-            case 'left':
-                newLng = currentLng - lngOffset;
-                break;
-            case 'right':
-                newLng = currentLng + lngOffset;
-                break;
-        }
-        
-        // Move the map to the new position
-        this.modernMap.setView([newLat, newLng], this.modernMap.getZoom(), { animate: true });
+    getCurrentImageScale() {
+        const transform = this.imageElement.style.transform || '';
+        const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+        return scaleMatch ? parseFloat(scaleMatch[1]) : 1;
     }
     
-    zoomMap(direction) {
-        if (!this.modernMap) return;
+    resetZoom() {
+        if (!this.modernMap || !this.imageElement) return;
         
-        const currentCenter = this.modernMap.getCenter();
-        const currentZoom = this.modernMap.getZoom();
+        // Reset to the saved perfect center and zoom level
+        this.applySavedConfiguration();
         
-        if (direction === 'in') {
-            // Zoom in - increase zoom level while keeping exact center
-            const newZoom = Math.min(currentZoom + 1, 18); // Limit max zoom
-            this.modernMap.setView(currentCenter, newZoom, { animate: false });
-            
-        } else if (direction === 'out') {
-            // Zoom out - decrease zoom level while keeping exact center
-            const newZoom = Math.max(currentZoom - 1, 1); // Limit min zoom
-            this.modernMap.setView(currentCenter, newZoom, { animate: false });
-        }
+        // Reset image scale to 1
+        this.imageElement.style.transform = 'scale(1)';
+        
+        console.log('Zoom reset to default');
     }
     
-    resetMapView() {
-        if (!this.modernMap) return;
-        
-        // Reset to European Istanbul view
-        const europeanIstanbulCenter = [41.0082, 28.9784];
-        
-        // Reset to initial view covering entire European Istanbul
-        this.modernMap.setView(europeanIstanbulCenter, 10);
-        
-        // Reset rotation
-        this.rotateMapTo(0);
-        
-        // Update rotation input
-        const rotationInput = document.getElementById('rotation-input');
-        if (rotationInput) {
-            rotationInput.value = 0;
-        }
-    }
+
+    
+
     
     rotateMap(degrees) {
         if (!this.modernMap) return;
