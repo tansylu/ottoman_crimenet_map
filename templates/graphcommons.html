@@ -1,10 +1,9 @@
+<div style="display: flex; justify-content: center; width: 100%;">
+  <div id="network" style="width: 90%; height: 900px; border: 1px solid #ccc;"></div>
+</div>
 
+<div id="info-box" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 9999; max-width: 300px; pointer-events: none;"></div>
 
-    <!-- Network container with proper dimensions -->
-<div id="network"></div>
-
-<!-- Info box for node details -->
-<div id="info-box" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; max-width: 300px;"></div>
 
 <!-- vis-network JS CDN -->
 <script src="https://unpkg.com/vis-network@9/dist/vis-network.min.js"></script>
@@ -75,18 +74,33 @@ const network = new vis.Network(container, networkData, options);
 
 // Click listener for popup
 network.on("click", function (params) {
+  console.log("Click detected:", params);
+  
   if (params.nodes.length > 0) {
     const nodeId = params.nodes[0];
     const node = nodes.find(n => n.id === nodeId);
+    console.log("Node found:", node);
+    
     if (node) {
+      const infoBox = document.getElementById('info-box');
+      console.log("Info box element:", infoBox);
+      
       infoBox.innerHTML = `
         <strong>${node.label}</strong><br/>
-        ${node.description}
+        Place of Forgery: ${node.description || "No information available"}
       `;
       infoBox.style.display = "block";
+      infoBox.style.position = "absolute";
+      infoBox.style.zIndex = "9999";
+      
+      // Position next to the click
+      infoBox.style.left = (params.pointer.DOM.x + 10) + "px";
+      infoBox.style.top = (params.pointer.DOM.y - 50) + "px";
+      
+      console.log("Info box should be visible now");
     }
   } else {
-    infoBox.style.display = "none"; 
+    document.getElementById('info-box').style.display = "none"; 
   }
 });
 </script>

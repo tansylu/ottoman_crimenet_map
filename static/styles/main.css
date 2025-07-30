@@ -1080,7 +1080,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     background-color: var(--mint-beige);
     border-radius: 8px;
-    padding: 20px;
+    padding: 12px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     flex: 1;
@@ -1120,6 +1120,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .member-title {
+    margin: 0 0 5px 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.member-program {
     margin: 0 0 5px 0;
     color: #555;
     font-size: 0.9rem;
