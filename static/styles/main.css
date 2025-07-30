@@ -851,7 +851,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 20px; /* Reduced padding to allow more content width */
+    padding: 0 30px; /* Increased padding to prevent content from going beyond screen edges */
     box-sizing: border-box;
 }
 

@@ -95,7 +95,7 @@ class BeyogluMapOverlay {
         
         // Initialize Leaflet map
         this.modernMap = L.map('modern-map', {
-            zoomControl: true,
+            zoomControl: false,
             attributionControl: false,
             dragging: true,  // Disable dragging since we don't have controls
             touchZoom: false,
@@ -392,7 +392,37 @@ class BeyogluMapOverlay {
             });
         }
         
+        // Setup scroll indicators
+        this.setupScrollIndicators();
+        
         console.log('Zoom controls initialized');
+    }
+    
+    setupScrollIndicators() {
+        const sectionContents = document.querySelectorAll('.section-content');
+        
+        sectionContents.forEach(section => {
+            this.checkScrollOverflow(section);
+            
+            // Check on scroll
+            section.addEventListener('scroll', () => {
+                this.checkScrollOverflow(section);
+            });
+            
+            // Check on resize
+            window.addEventListener('resize', () => {
+                this.checkScrollOverflow(section);
+            });
+        });
+    }
+    
+    checkScrollOverflow(section) {
+        const hasOverflow = section.scrollHeight > section.clientHeight;
+        if (hasOverflow) {
+            section.classList.add('has-overflow');
+        } else {
+            section.classList.remove('has-overflow');
+        }
     }
     
     zoomBoth(direction) {
