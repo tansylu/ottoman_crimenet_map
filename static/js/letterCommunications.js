@@ -95,9 +95,9 @@ function fetchDiplomatLetters(diplomatId, db, map) {
 
     const communicationsClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: 20,
-        spiderfyOnMaxZoom: true,
-        disableClusteringAtZoom: 14,
+        maxClusterRadius: 30,
+        spiderfyOnMaxZoom: false, // Disable spiderfy to prevent dummy arrows
+        disableClusteringAtZoom: 12, // Disable clustering at higher zoom levels
         iconCreateFunction: function(cluster) {
             const count = cluster.getChildCount();
             let size = 'small';
@@ -171,61 +171,100 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
     const diplomat = allDiplomats.find(d => d.id === diplomatId);
     updateDescriptionBox(diplomat);
 
+    // Group communications by unique routes (sender-receiver pairs)
+    const routeGroups = new Map();
+    const locationToMarkers = new Map();
     const markers = [];
 
+    // First pass: group letters by routes and locations
     letters.forEach((letter, index) => {
         if (!letter.sender_location || !letter.receiver_location) return;
 
-        // Get coordinates for sender and receiver
-        getLocationCoordinates(letter.sender_location)
-            .then(senderCoords => {
-                return getLocationCoordinates(letter.receiver_location)
-                    .then(receiverCoords => {
-                        const senderLat = senderCoords.lat;
-                        const senderLng = senderCoords.lng;
-                        const receiverLat = receiverCoords.lat;
-                        const receiverLng = receiverCoords.lng;
-
-                        // Create sender marker
-                        const senderMarker = L.marker([senderLat, senderLng], {
-                            icon: createMarkerIcon('sender', index + 1),
-                            riseOnHover: true,
-                            title: letter.sender || 'Sender'
-                        });
-
-                        // Create receiver marker
-                        const receiverMarker = L.marker([receiverLat, receiverLng], {
-                            icon: createMarkerIcon('receiver', index + 1),
-                            riseOnHover: true,
-                            title: letter.receiver || 'Receiver'
-                        });
-
-                        // Create popups
-                        senderMarker.bindPopup(createPopupContent(letter, 'sender'));
-                        receiverMarker.bindPopup(createPopupContent(letter, 'receiver'));
-
-                        // Add markers to cluster group
-                        clusterGroup.addLayer(senderMarker);
-                        clusterGroup.addLayer(receiverMarker);
-                        markers.push(senderMarker, receiverMarker);
-
-                        // Create arrow between sender and receiver
-                        const arrow = window.markerUtils_createArrow
-                            ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter')
-                            : createArrow([senderLat, senderLng], [receiverLat, receiverLng], letter.type || 'letter');
-
-                        communicationLayer.addLayer(arrow);
-
-                        // Fit map to show all markers after adding each one
-                        if (markers.length > 0) {
-                            const group = L.featureGroup(markers);
-                            map.fitBounds(group.getBounds().pad(0.1));
-                        }
-                    });
-            })
-            .catch(error => {
-                console.error(`Error getting coordinates for ${letter.sender_location} or ${letter.receiver_location}:`, error);
+        // Create a unique route key (normalize order to avoid duplicate routes)
+        const locations = [letter.sender_location, letter.receiver_location].sort();
+        const routeKey = `${locations[0]}__${locations[1]}`;
+        
+        if (!routeGroups.has(routeKey)) {
+            routeGroups.set(routeKey, {
+                letters: [],
+                sender_location: letter.sender_location,
+                receiver_location: letter.receiver_location,
+                sender: letter.sender,
+                receiver: letter.receiver
             });
+        }
+        routeGroups.get(routeKey).letters.push(letter);
+
+        // Group letters by location for markers
+        if (!locationToMarkers.has(letter.sender_location)) {
+            locationToMarkers.set(letter.sender_location, {
+                letters: [],
+                type: 'sender',
+                name: letter.sender
+            });
+        }
+        locationToMarkers.get(letter.sender_location).letters.push(letter);
+
+        if (!locationToMarkers.has(letter.receiver_location)) {
+            locationToMarkers.set(letter.receiver_location, {
+                letters: [],
+                type: 'receiver', 
+                name: letter.receiver
+            });
+        }
+        locationToMarkers.get(letter.receiver_location).letters.push(letter);
+    });
+
+    // Process location promises for unique locations only
+    const locationPromises = Array.from(locationToMarkers.keys()).map(location => 
+        getLocationCoordinates(location).then(coords => ({ location, coords }))
+    );
+
+    Promise.all(locationPromises).then(locationData => {
+        const locationCoords = new Map();
+        locationData.forEach(({ location, coords }) => {
+            locationCoords.set(location, coords);
+        });
+
+        // Create markers for each unique location
+        locationToMarkers.forEach((data, location) => {
+            const coords = locationCoords.get(location);
+            if (!coords) return;
+
+            const letterCount = data.letters.length;
+            const marker = L.marker([coords.lat, coords.lng], {
+                icon: createMarkerIcon(data.type, letterCount),
+                interactive: false, // Make markers non-interactive
+                riseOnHover: false
+            });
+
+            // Don't bind popup or make markers clickable
+            clusterGroup.addLayer(marker);
+            markers.push(marker);
+        });
+
+        // Create arrows for unique routes only
+        routeGroups.forEach(routeData => {
+            const senderCoords = locationCoords.get(routeData.sender_location);
+            const receiverCoords = locationCoords.get(routeData.receiver_location);
+            
+            if (!senderCoords || !receiverCoords) return;
+
+            // Create only one arrow per unique route, regardless of number of communications
+            const arrow = window.markerUtils_createArrow
+                ? window.markerUtils_createArrow([senderCoords.lat, senderCoords.lng], [receiverCoords.lat, receiverCoords.lng], routeData.letters[0].type || 'letter')
+                : createArrow([senderCoords.lat, senderCoords.lng], [receiverCoords.lat, receiverCoords.lng], routeData.letters[0].type || 'letter');
+
+            communicationLayer.addLayer(arrow);
+        });
+
+        // Fit map to show all markers
+        if (markers.length > 0) {
+            const group = L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }).catch(error => {
+        console.error(`Error getting coordinates:`, error);
     });
 
     // Update communications info panel
@@ -251,6 +290,45 @@ function createPopupContent(letter, perspective) {
             <p><strong>Location:</strong> ${location || 'Unknown'}</p>
             <p><strong>${direction}:</strong> ${otherName || 'Unknown'}</p>
             <p><strong>Date:</strong> ${formatDate(letter.date)}</p>
+        </div>
+    `;
+}
+
+/**
+ * Create popup content for a location with multiple letters
+ * @param {Array} letters - Array of letter data at this location
+ * @param {string} type - 'sender' or 'receiver'
+ * @param {string} location - Location name
+ * @returns {string} HTML content for popup
+ */
+function createLocationPopupContent(letters, type, location) {
+    const uniquePersons = [...new Set(letters.map(letter => 
+        type === 'sender' ? letter.sender : letter.receiver
+    ))];
+    
+    const letterCount = letters.length;
+    const personList = uniquePersons.slice(0, 3).join(', ') + 
+        (uniquePersons.length > 3 ? ` and ${uniquePersons.length - 3} others` : '');
+
+    return `
+        <div class="marker-popup">
+            <h3>${location}</h3>
+            <p><strong>Role:</strong> ${type === 'sender' ? 'Sending' : 'Receiving'} location</p>
+            <p><strong>Communications:</strong> ${letterCount}</p>
+            <p><strong>People:</strong> ${personList}</p>
+            <div class="communications-list">
+                ${letters.slice(0, 5).map(letter => {
+                    const otherPerson = type === 'sender' ? letter.receiver : letter.sender;
+                    const direction = type === 'sender' ? 'To' : 'From';
+                    return `
+                        <div class="communication-item">
+                            <small><strong>${direction}:</strong> ${otherPerson || 'Unknown'}</small>
+                            <small><strong>Date:</strong> ${formatDate(letter.date)}</small>
+                        </div>
+                    `;
+                }).join('')}
+                ${letters.length > 5 ? `<small><em>... and ${letters.length - 5} more</em></small>` : ''}
+            </div>
         </div>
     `;
 }
@@ -349,21 +427,18 @@ function fetchAllLetters(db, map) {
                 // Create sender marker
                 const senderMarker = L.marker([senderLat, senderLng], {
                     icon: createMarkerIcon('sender', index + 1),
-                    riseOnHover: true,
-                    title: letter.sender || 'Sender'
+                    interactive: false, // Make markers non-interactive
+                    riseOnHover: false
                 });
 
                 // Create receiver marker
                 const receiverMarker = L.marker([receiverLat, receiverLng], {
                     icon: createMarkerIcon('receiver', index + 1),
-                    riseOnHover: true,
-                    title: letter.receiver || 'Receiver'
+                    interactive: false, // Make markers non-interactive
+                    riseOnHover: false
                 });
 
-                // Create popups
-                senderMarker.bindPopup(createPopupContent(letter, 'sender'));
-                receiverMarker.bindPopup(createPopupContent(letter, 'receiver'));
-
+                // Don't bind popups - markers are non-interactive
                 // Add markers to cluster group
                 communicationsClusterGroup.addLayer(senderMarker);
                 communicationsClusterGroup.addLayer(receiverMarker);
@@ -411,11 +486,10 @@ function fetchLetterCommunications(db, map) {
     // Create a cluster group specifically for the communications
     const communicationsClusterGroup = L.markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: 20,
-        spiderfyOnMaxZoom: true,
+        maxClusterRadius: 30,
+        spiderfyOnMaxZoom: false, // Disable spiderfy to prevent dummy arrows
         zoomToBoundsOnClick: false,
-        disableClusteringAtZoom: 14,
-        spiderfyDistanceMultiplier: 3,
+        disableClusteringAtZoom: 12, // Disable clustering at higher zoom levels
         animate: false,
         iconCreateFunction: function(cluster) {
             const count = cluster.getChildCount();
@@ -440,7 +514,6 @@ function fetchLetterCommunications(db, map) {
 
             const communications = [];
             const communicationMarkers = [];
-            const communicationMarkersArray = [];
 
             // Process all communications
             querySnapshot.forEach((doc) => {
@@ -507,50 +580,77 @@ function fetchLetterCommunications(db, map) {
                     return a.date.seconds - b.date.seconds;
                 });
 
-                // Add markers for each communication
-                communications.forEach((comm, index) => {
-                    const senderLat = comm.senderLocation.latitude;
-                    const senderLng = comm.senderLocation.longitude;
-                    const receiverLat = comm.receiverLocation.latitude;
-                    const receiverLng = comm.receiverLocation.longitude;
+                // Group communications by unique routes (sender-receiver pairs)
+                const routeGroups = new Map();
+                const locationToMarkers = new Map();
 
-                    // Create sender marker
-                    const senderMarker = L.marker([senderLat, senderLng], {
-                        icon: createMarkerIcon('sender', index + 1),
-                        riseOnHover: true,
-                        title: comm.sender || 'Sender'
+                communications.forEach(comm => {
+                    // Create a unique route key (normalize order to avoid duplicate routes)
+                    const locations = [comm.sender_location, comm.receiver_location].sort();
+                    const routeKey = `${locations[0]}__${locations[1]}`;
+                    
+                    if (!routeGroups.has(routeKey)) {
+                        routeGroups.set(routeKey, {
+                            communications: [],
+                            senderLocation: comm.senderLocation,
+                            receiverLocation: comm.receiverLocation,
+                            sender_location: comm.sender_location,
+                            receiver_location: comm.receiver_location
+                        });
+                    }
+                    routeGroups.get(routeKey).communications.push(comm);
+
+                    // Group communications by location for markers
+                    if (!locationToMarkers.has(comm.sender_location)) {
+                        locationToMarkers.set(comm.sender_location, {
+                            communications: [],
+                            type: 'sender',
+                            coords: comm.senderLocation
+                        });
+                    }
+                    locationToMarkers.get(comm.sender_location).communications.push(comm);
+
+                    if (!locationToMarkers.has(comm.receiver_location)) {
+                        locationToMarkers.set(comm.receiver_location, {
+                            communications: [],
+                            type: 'receiver',
+                            coords: comm.receiverLocation
+                        });
+                    }
+                    locationToMarkers.get(comm.receiver_location).communications.push(comm);
+                });
+
+                // Create markers for each unique location
+                locationToMarkers.forEach((data, location) => {
+                    const commCount = data.communications.length;
+                    const marker = L.marker([data.coords.latitude, data.coords.longitude], {
+                        icon: createMarkerIcon(data.type, commCount),
+                        interactive: false, // Make markers non-interactive
+                        riseOnHover: false
                     });
 
-                    // Create receiver marker
-                    const receiverMarker = L.marker([receiverLat, receiverLng], {
-                        icon: createMarkerIcon('receiver', index + 1),
-                        riseOnHover: true,
-                        title: comm.receiver || 'Receiver'
-                    });
+                    // Don't bind popup or make markers clickable
+                    communicationsClusterGroup.addLayer(marker);
+                    communicationMarkers.push(marker);
+                });
 
-                    // Create popup content
-                    const senderPopupContent = createCommunicationPopup(comm, 'sender');
-                    senderMarker.bindPopup(senderPopupContent);
+                // Create arrows for unique routes only
+                routeGroups.forEach(routeData => {
+                    const senderLat = routeData.senderLocation.latitude;
+                    const senderLng = routeData.senderLocation.longitude;
+                    const receiverLat = routeData.receiverLocation.latitude;
+                    const receiverLng = routeData.receiverLocation.longitude;
 
-                    const receiverPopupContent = createCommunicationPopup(comm, 'receiver');
-                    receiverMarker.bindPopup(receiverPopupContent);
-
-                    // Add to cluster group
-                    communicationsClusterGroup.addLayer(senderMarker);
-                    communicationsClusterGroup.addLayer(receiverMarker);
-                    communicationMarkers.push(senderMarker, receiverMarker);
-                    communicationMarkersArray.push([senderMarker, receiverMarker]);
-
-                    // Draw arrow between locations
+                    // Create only one arrow per unique route, regardless of number of communications
                     const arrow = window.markerUtils_createArrow
-                        ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], comm.type)
-                        : createArrow([senderLat, senderLng], [receiverLat, receiverLng], comm.type);
+                        ? window.markerUtils_createArrow([senderLat, senderLng], [receiverLat, receiverLng], routeData.communications[0].type)
+                        : createArrow([senderLat, senderLng], [receiverLat, receiverLng], routeData.communications[0].type);
 
                     communicationLayer.addLayer(arrow);
                 });
 
                 // Store markers globally for reference
-                window.communicationMarkersArray = communicationMarkersArray;
+                window.communicationMarkersArray = communicationMarkers;
 
                 // Fit map to show all communications
                 if (communicationMarkers.length > 0) {
@@ -603,6 +703,54 @@ function createCommunicationPopup(comm, perspective) {
             <p><strong>Location:</strong> ${location || 'Unknown'}</p>
             <p><strong>${direction}:</strong> ${otherName || 'Unknown'}</p>
             <p><strong>Date:</strong> ${dateStr}</p>
+        </div>
+    `;
+}
+
+/**
+ * Create popup content for a location with multiple communications
+ * @param {Array} communications - Array of communication data at this location
+ * @param {string} type - 'sender' or 'receiver'
+ * @param {string} location - Location name
+ * @returns {string} HTML content for popup
+ */
+function createLocationCommunicationPopup(communications, type, location) {
+    const uniquePersons = [...new Set(communications.map(comm => 
+        type === 'sender' ? comm.sender : comm.receiver
+    ))];
+    
+    const commCount = communications.length;
+    const personList = uniquePersons.slice(0, 3).join(', ') + 
+        (uniquePersons.length > 3 ? ` and ${uniquePersons.length - 3} others` : '');
+
+    return `
+        <div class="marker-popup">
+            <h3>${location}</h3>
+            <p><strong>Role:</strong> ${type === 'sender' ? 'Sending' : 'Receiving'} location</p>
+            <p><strong>Communications:</strong> ${commCount}</p>
+            <p><strong>People:</strong> ${personList}</p>
+            <div class="communications-list">
+                ${communications.slice(0, 5).map(comm => {
+                    const otherPerson = type === 'sender' ? comm.receiver : comm.sender;
+                    const direction = type === 'sender' ? 'To' : 'From';
+                    let dateStr = 'Unknown Date';
+                    if (comm.date) {
+                        if (comm.date.toDate) {
+                            const date = comm.date.toDate();
+                            dateStr = date.toLocaleDateString();
+                        } else if (typeof comm.date === 'string') {
+                            dateStr = comm.date;
+                        }
+                    }
+                    return `
+                        <div class="communication-item">
+                            <small><strong>${direction}:</strong> ${otherPerson || 'Unknown'}</small>
+                            <small><strong>Date:</strong> ${dateStr}</small>
+                        </div>
+                    `;
+                }).join('')}
+                ${communications.length > 5 ? `<small><em>... and ${communications.length - 5} more</em></small>` : ''}
+            </div>
         </div>
     `;
 }
@@ -682,64 +830,44 @@ function formatDate(timestamp) {
 }
 
 /**
- * Create a marker icon based on type
+ * Create a marker icon based on type with communication count
  * @param {string} type - 'sender' or 'receiver'
- * @param {number} index - Index number for the marker
+ * @param {number} count - Number of communications
  * @returns {L.DivIcon} Leaflet div icon
  */
-function createMarkerIcon(type, index) {
-    const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
-    const color = colors[index % colors.length];
+function createMarkerIcon(type, count) {
+    // Use the same color for all markers
+    const color = '#2c3e50'; // Dark blue-gray color for all markers
 
     return L.divIcon({
-        html: `<div class="marker-icon marker-${type}" style="background-color: ${color};"></div>`,
-        className: 'custom-marker',
-        iconSize: [20, 20],
-        iconAnchor: [10, 10]
+        html: `
+            <div class="marker-icon marker-${type}" style="background-color: ${color};">
+                <span class="marker-count">${count}</span>
+            </div>
+        `,
+        className: 'custom-marker non-interactive',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
     });
 }
 
 /**
- * Create an arrow between two points
+ * Create a simple line between two points (no arrows)
  * @param {Array} start - Start coordinates [lat, lng]
  * @param {Array} end - End coordinates [lat, lng]
  * @param {string} type - Type of communication
- * @returns {L.LayerGroup} Layer group containing the arrow
+ * @returns {L.Polyline} Simple line between points
  */
 function createArrow(start, end, type) {
-    const arrowLayer = L.layerGroup();
-
-    // Create the line
+    // Create just a simple line without arrow markers
     const line = L.polyline([start, end], {
         color: type === 'telegram' ? '#9b59b6' : '#e74c3c',
-        weight: 2,
-        opacity: 0.7
+        weight: 3,
+        opacity: 0.8,
+        dashArray: type === 'telegram' ? '5, 5' : null // Dashed line for telegrams
     });
 
-    arrowLayer.addLayer(line);
-
-    // Calculate the midpoint for the arrow
-    const midpoint = [
-        (start[0] + end[0]) / 2,
-        (start[1] + end[1]) / 2
-    ];
-
-    // Calculate the angle for the arrow
-    const angle = Math.atan2(end[0] - start[0], end[1] - start[1]) * 180 / Math.PI;
-
-    // Create a marker for the arrow
-    const arrowMarker = L.marker(midpoint, {
-        icon: L.divIcon({
-            html: `<div class="arrow-icon" style="transform: rotate(${angle}deg);">→</div>`,
-            className: 'arrow-marker',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        })
-    });
-
-    arrowLayer.addLayer(arrowMarker);
-
-    return arrowLayer;
+    return line;
 }
 
 /**
