@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const birthplace = data.birthplace || 'Unknown';
       const nationality = data.nation || data.nationality || 'Unknown';
       const occupation = data.prof || data.occupation || 'Unknown';
-      const placeOfArrest = data.placeOfArrest || data.placeofprof || 'Unknown';
+      const placeOfArrest = data.placeOfArrest || 'Unknown';
 
       // "Unknown" sayısını hesapla
       let unknownCount = 0;
