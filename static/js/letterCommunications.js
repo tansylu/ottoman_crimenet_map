@@ -171,18 +171,30 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
     const diplomat = allDiplomats.find(d => d.id === diplomatId);
     updateDescriptionBox(diplomat);
 
-    // Group communications by unique routes (sender-receiver pairs)
+    // Filter to show only OUTGOING letters (where selected diplomat is the sender)
+    const outgoingLetters = letters.filter(letter => {
+        const senderId = letter.sender ? letter.sender.replace(/\s+/g, '_').toLowerCase() : '';
+        return senderId === diplomatId;
+    });
+
+    if (outgoingLetters.length === 0) {
+        updateDescriptionBox(`No outgoing letters found for ${diplomat.name}.`);
+        return;
+    }
+
+    console.log(`Showing ${outgoingLetters.length} outgoing letters for ${diplomat.name}`);
+
+    // Group communications by unique routes (only outgoing)
     const routeGroups = new Map();
     const locationToMarkers = new Map();
     const markers = [];
 
-    // First pass: group letters by routes and locations
-    letters.forEach((letter, index) => {
+    // Process only outgoing letters
+    outgoingLetters.forEach((letter, index) => {
         if (!letter.sender_location || !letter.receiver_location) return;
 
-        // Create a unique route key (normalize order to avoid duplicate routes)
-        const locations = [letter.sender_location, letter.receiver_location].sort();
-        const routeKey = `${locations[0]}__${locations[1]}`;
+        // Create a unique route key for outgoing communications
+        const routeKey = `${letter.sender_location}__to__${letter.receiver_location}`;
         
         if (!routeGroups.has(routeKey)) {
             routeGroups.set(routeKey, {
@@ -195,7 +207,7 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
         }
         routeGroups.get(routeKey).letters.push(letter);
 
-        // Group letters by location for markers
+        // Add sender location (selected diplomat's location)
         if (!locationToMarkers.has(letter.sender_location)) {
             locationToMarkers.set(letter.sender_location, {
                 letters: [],
@@ -205,6 +217,7 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
         }
         locationToMarkers.get(letter.sender_location).letters.push(letter);
 
+        // Add receiver locations
         if (!locationToMarkers.has(letter.receiver_location)) {
             locationToMarkers.set(letter.receiver_location, {
                 letters: [],
@@ -267,8 +280,8 @@ function displayLettersOnMap(letters, diplomatId, map, clusterGroup) {
         console.error(`Error getting coordinates:`, error);
     });
 
-    // Update communications info panel
-    updateCommunicationsInfo(letters);
+    // Update communications info panel with outgoing letters only
+    updateCommunicationsInfo(outgoingLetters);
 }
 
 /**
@@ -346,11 +359,14 @@ function updateDescriptionBox(content) {
         return;
     }
 
-    let description = content.name;
-    if (content.title) description += `, ${content.title}`;
-    if (content.country) description += ` (${content.country})`;
+    let description = `<h3>${content.name}</h3>`;
+    if (content.title) description += `<p><strong>Title:</strong> ${content.title}</p>`;
+    if (content.country) description += `<p><strong>Country:</strong> ${content.country}</p>`;
+    
+    // Add information about the one-way direction display
+    description += `<p><em>Showing outgoing correspondence only (letters sent by ${content.name})</em></p>`;
 
-    descriptionElement.textContent = description;
+    descriptionElement.innerHTML = description;
 }
 
 /**
@@ -836,18 +852,31 @@ function formatDate(timestamp) {
  * @returns {L.DivIcon} Leaflet div icon
  */
 function createMarkerIcon(type, count) {
-    // Use the same color for all markers
-    const color = '#2c3e50'; // Dark blue-gray color for all markers
+    // Different colors and sizes for senders vs receivers
+    const config = {
+        'sender': {
+            color: '#8B4513', // Brown color for senders
+            size: 40,         // Bigger size for senders
+            fontSize: '14px'
+        },
+        'receiver': {
+            color: '#4169E1', // Royal blue color for receivers
+            size: 30,         // Smaller size for receivers
+            fontSize: '12px'
+        }
+    };
+    
+    const markerConfig = config[type] || config['receiver'];
 
     return L.divIcon({
         html: `
-            <div class="marker-icon marker-${type}" style="background-color: ${color};">
-                <span class="marker-count">${count}</span>
+            <div class="marker-icon marker-${type}" style="background-color: ${markerConfig.color};">
+                <span class="marker-count" style="font-size: ${markerConfig.fontSize};">${count}</span>
             </div>
         `,
         className: 'custom-marker non-interactive',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+        iconSize: [markerConfig.size, markerConfig.size],
+        iconAnchor: [markerConfig.size / 2, markerConfig.size / 2]
     });
 }
 
@@ -872,7 +901,7 @@ function createArrow(start, end, type) {
 
 /**
  * Update communications info panel with letters for a specific diplomat
- * @param {Array} letters - Array of letter objects
+ * @param {Array} letters - Array of letter objects (outgoing only)
  */
 function updateCommunicationsInfo(letters) {
     const infoElement = document.getElementById('communications-events');
@@ -880,10 +909,10 @@ function updateCommunicationsInfo(letters) {
 
     infoElement.innerHTML = '';
 
-    console.log("Letters to display in communications panel:", letters);
+    console.log("Outgoing letters to display in communications panel:", letters);
 
     if (letters.length === 0) {
-        infoElement.innerHTML = '<p>No communications found for this diplomat.</p>';
+        infoElement.innerHTML = '<p>No outgoing communications found for this diplomat.</p>';
         return;
     }
 
@@ -896,10 +925,6 @@ function updateCommunicationsInfo(letters) {
         }
         return a.date.seconds - b.date.seconds;
     });
-
-    // Log the diplomat ID we're using for comparison
-    const diplomatId = document.getElementById('diplomat-selector').value;
-    console.log("Selected diplomat ID for comparison:", diplomatId);
 
     letters.forEach((letter, index) => {
         const eventItem = document.createElement('div');
@@ -918,24 +943,12 @@ function updateCommunicationsInfo(letters) {
             }
         }
 
-        console.log(`Letter ${index} - date:`, letter.date, "formatted as:", dateStr);
-
-        // Check if this diplomat is the sender or receiver
-        const senderId = letter.sender ? letter.sender.replace(/\s+/g, '_').toLowerCase() : '';
-        const receiverId = letter.receiver ? letter.receiver.replace(/\s+/g, '_').toLowerCase() : '';
-
-        console.log(`Letter ${index} - sender: "${letter.sender}" (ID: ${senderId}), receiver: "${letter.receiver}" (ID: ${receiverId})`);
-
-        const isSender = senderId === diplomatId;
-        const direction = isSender ? 'To' : 'From';
-        const otherParty = isSender ? letter.receiver : letter.sender;
-
-        console.log(`Letter ${index} - isSender: ${isSender}, direction: ${direction}, otherParty: ${otherParty}`);
-
+        // Since we're only showing outgoing letters, always show "To:"
         eventItem.innerHTML = `
             <div class="event-date">${dateStr}</div>
             <div class="event-content">
-                <p><strong>${direction}:</strong> ${otherParty || 'Unknown'}</p>
+                <p><strong>To:</strong> ${letter.receiver || 'Unknown'}</p>
+                ${letter.receiver_location ? `<p><small>Location: ${letter.receiver_location}</small></p>` : ''}
             </div>
         `;
 
